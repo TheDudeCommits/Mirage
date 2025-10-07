@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Assistant Test Interface</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .recording {
+            background-color: var(--bs-danger) !important;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .status-indicator {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .status-ready { background-color: var(--bs-success); }
+        .status-processing { background-color: var(--bs-warning); animation: pulse 1s infinite; }
+        .status-error { background-color: var(--bs-danger); }
+        
+        .audio-visualizer {
+            height: 60px;
+            background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .subtitle-text {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="mb-0">
+                            <span class="status-indicator status-ready" id="statusIndicator"></span>
+                            Voice AI Assistant Test Interface
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Recording Section -->
+                        <div class="mb-4">
+                            <h5>Record Audio</h5>
+                            <div class="d-flex gap-2 mb-3">
+                                <button class="btn btn-primary" id="startRecord">
+                                    🎤 Start Recording
+                                </button>
+                                <button class="btn btn-danger d-none" id="stopRecord">
+                                    ⏹️ Stop Recording
+                                </button>
+                                <button class="btn btn-secondary" id="playRecording" disabled>
+                                    ▶️ Play Recording
+                                </button>
+                            </div>
+                            <div class="audio-visualizer d-none" id="recordingVisualizer">
+                                🎤 Recording in progress...
+                            </div>
+                            <audio controls class="w-100 d-none" id="recordedAudio"></audio>
+                        </div>
+
+                        <!-- File Upload Section -->
+                        <div class="mb-4">
+                            <h5>Upload Audio File</h5>
+                            <input type="file" class="form-control" id="audioFile" accept="audio/*">
+                            <small class="form-text text-muted">Supported formats: MP3, WAV, WEBM, M4A</small>
+                        </div>
+
+                        <!-- Send Button -->
+                        <div class="mb-4">
+                            <button class="btn btn-success btn-lg w-100" id="sendAudio" disabled>
+                                🚀 Send to AI Assistant
+                            </button>
+                            <button class="btn btn-warning mt-2" id="testAudio">
+                                🔊 Test Audio Generation (Skip AI)
+                            </button>
+                        </div>
+
+                        <!-- Progress Section -->
+                        <div class="mb-4 d-none" id="progressSection">
+                            <h5>Processing Status</h5>
+                            <div class="progress mb-2">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="progressBar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div id="progressText">Ready to process...</div>
+                        </div>
+
+                        <!-- Results Section -->
+                        <div class="d-none" id="resultsSection">
+                            <h5>AI Response</h5>
+                            
+                            <!-- Transcription -->
+                            <div class="mb-3">
+                                <h6>What you said:</h6>
+                                <div class="alert alert-info" id="transcriptionText"></div>
+                            </div>
+
+                            <!-- AI Response Text -->
+                            <div class="mb-3">
+                                <h6>AI Response:</h6>
+                                <div class="alert alert-success" id="responseText"></div>
+                            </div>
+
+                            <!-- Audio Response -->
+                            <div class="mb-3">
+                                <h6>AI Voice Response:</h6>
+                                <audio controls class="w-100" id="aiAudioResponse"></audio>
+                                <div class="subtitle-text d-none" id="subtitleText"></div>
+                            </div>
+
+                            <!-- Performance Stats -->
+                            <div class="mb-3">
+                                <h6>Performance:</h6>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <small class="text-muted">Total Time: <span id="totalTime">-</span></small>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <small class="text-muted">Compressed: <span id="compressionStatus">-</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Error Section -->
+                        <div class="alert alert-danger d-none" id="errorSection">
+                            <h6>Error:</h6>
+                            <div id="errorText"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Info -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">API Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <small><strong>Endpoint:</strong> /api/voice</small>
+                            </div>
+                            <div class="col-sm-6">
+                                <small><strong>Status:</strong> <span id="apiStatus">Checking...</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class VoiceAITester {
+            constructor() {
+                this.mediaRecorder = null;
+                this.recordedChunks = [];
+                this.recordedBlob = null;
+                this.startTime = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.checkAPIStatus();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    startRecord: document.getElementById('startRecord'),
+                    stopRecord: document.getElementById('stopRecord'),
+                    playRecording: document.getElementById('playRecording'),
+                    recordedAudio: document.getElementById('recordedAudio'),
+                    recordingVisualizer: document.getElementById('recordingVisualizer'),
+                    audioFile: document.getElementById('audioFile'),
+                    sendAudio: document.getElementById('sendAudio'),
+                    testAudio: document.getElementById('testAudio'),
+                    progressSection: document.getElementById('progressSection'),
+                    progressBar: document.getElementById('progressBar'),
+                    progressText: document.getElementById('progressText'),
+                    resultsSection: document.getElementById('resultsSection'),
+                    transcriptionText: document.getElementById('transcriptionText'),
+                    responseText: document.getElementById('responseText'),
+                    aiAudioResponse: document.getElementById('aiAudioResponse'),
+                    subtitleText: document.getElementById('subtitleText'),
+                    totalTime: document.getElementById('totalTime'),
+                    compressionStatus: document.getElementById('compressionStatus'),
+                    errorSection: document.getElementById('errorSection'),
+                    errorText: document.getElementById('errorText'),
+                    statusIndicator: document.getElementById('statusIndicator'),
+                    apiStatus: document.getElementById('apiStatus')
+                };
+            }
+
+            bindEvents() {
+                this.elements.startRecord.addEventListener('click', () => this.startRecording());
+                this.elements.stopRecord.addEventListener('click', () => this.stopRecording());
+                this.elements.playRecording.addEventListener('click', () => this.playRecording());
+                this.elements.audioFile.addEventListener('change', () => this.handleFileUpload());
+                this.elements.sendAudio.addEventListener('click', () => this.sendToAPI());
+                this.elements.testAudio.addEventListener('click', () => this.testAudioGeneration());
+                this.elements.aiAudioResponse.addEventListener('play', () => this.showSubtitles());
+            }
+
+            async checkAPIStatus() {
+                try {
+                    const response = await fetch('/health');
+                    if (response.ok) {
+                        this.elements.apiStatus.textContent = 'Online';
+                        this.elements.apiStatus.className = 'text-success';
+                    } else {
+                        throw new Error('API not responding');
+                    }
+                } catch (error) {
+                    this.elements.apiStatus.textContent = 'Offline';
+                    this.elements.apiStatus.className = 'text-danger';
+                }
+            }
+
+            async startRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.recordedChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.recordedChunks.push(event.data);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        this.recordedBlob = new Blob(this.recordedChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(this.recordedBlob);
+                        this.elements.recordedAudio.src = audioUrl;
+                        this.elements.recordedAudio.classList.remove('d-none');
+                        this.elements.playRecording.disabled = false;
+                        this.elements.sendAudio.disabled = false;
+                        this.updateStatus('ready');
+                    };
+
+                    this.mediaRecorder.start();
+                    this.elements.startRecord.classList.add('d-none');
+                    this.elements.stopRecord.classList.remove('d-none');
+                    this.elements.recordingVisualizer.classList.remove('d-none');
+                    this.updateStatus('recording');
+                } catch (error) {
+                    this.showError('Failed to access microphone: ' + error.message);
+                }
+            }
+
+            stopRecording() {
+                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                this.elements.startRecord.classList.remove('d-none');
+                this.elements.stopRecord.classList.add('d-none');
+                this.elements.recordingVisualizer.classList.add('d-none');
+            }
+
+            playRecording() {
+                this.elements.recordedAudio.play();
+            }
+
+            handleFileUpload() {
+                const file = this.elements.audioFile.files[0];
+                if (file) {
+                    this.recordedBlob = file;
+                    this.elements.sendAudio.disabled = false;
+                    this.updateStatus('ready');
+                }
+            }
+
+            async sendToAPI() {
+                if (!this.recordedBlob) return;
+
+                this.startTime = Date.now();
+                this.updateStatus('processing');
+                this.showProgress('Sending audio to AI assistant...', 10);
+                this.hideResults();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('audio', this.recordedBlob, 'audio.webm');
+
+                    this.showProgress('Processing with AI...', 30);
+
+                    const response = await fetch('/api/voice', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    this.showProgress('Generating response...', 70);
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    this.showProgress('Complete!', 100);
+                    
+                    setTimeout(() => {
+                        this.displayResults(result);
+                        this.updateStatus('ready');
+                    }, 500);
+
+                } catch (error) {
+                    this.showError('Failed to process audio: ' + error.message);
+                    this.updateStatus('error');
+                }
+            }
+
+            async displayResults(result) {
+                this.hideProgress();
+                
+                // Display transcription
+                this.elements.transcriptionText.textContent = result.transcription || 'No transcription available';
+                
+                // Display AI response text
+                this.elements.responseText.textContent = result.text || 'No response text available';
+                
+                // Handle audio data - no compression anymore
+                try {
+                    const audioData = result.audio;
+                    
+                    // Create audio blob with proper error handling
+                    const audioBytes = this.base64ToArrayBuffer(audioData);
+                    const audioBlob = new Blob([audioBytes], { type: 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    // Set audio source and add error handling
+                    this.elements.aiAudioResponse.src = audioUrl;
+                    this.elements.aiAudioResponse.load(); // Force reload
+                    
+                    // Add event listeners for debugging
+                    this.elements.aiAudioResponse.addEventListener('loadeddata', () => {
+                        console.log('Audio loaded successfully');
+                    });
+                    
+                    this.elements.aiAudioResponse.addEventListener('error', (e) => {
+                        console.error('Audio playback error:', e);
+                        this.showError('Audio playback failed. The audio data may be corrupted.');
+                    });
+                    
+                    console.log('Audio blob created, size:', audioBlob.size, 'bytes');
+                    
+                } catch (error) {
+                    console.error('Error processing audio:', error);
+                    this.showError('Failed to process audio response: ' + error.message);
+                }
+                
+                // Store subtitle text for later
+                this.subtitleText = result.text;
+                
+                // Display performance stats
+                const totalTime = Date.now() - this.startTime;
+                this.elements.totalTime.textContent = `${totalTime}ms`;
+                this.elements.compressionStatus.textContent = result.compressed ? 'Yes' : 'No';
+                
+                // Show results section
+                this.elements.resultsSection.classList.remove('d-none');
+            }
+
+            // Decompression function removed - no longer needed
+
+            base64ToArrayBuffer(base64) {
+                try {
+                    // Clean the base64 string
+                    const cleanBase64 = base64.replace(/[^A-Za-z0-9+/]/g, '');
+                    
+                    // Add padding if needed
+                    const paddedBase64 = cleanBase64 + '='.repeat((4 - cleanBase64.length % 4) % 4);
+                    
+                    // Decode to binary string
+                    const binaryString = atob(paddedBase64);
+                    
+                    // Convert to Uint8Array
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    
+                    console.log('Base64 decoded successfully, size:', bytes.length, 'bytes');
+                    
+                    // Verify it looks like MP3 (starts with ID3 or FF FB)
+                    const header = new TextDecoder().decode(bytes.slice(0, 3));
+                    if (header === 'ID3' || bytes[0] === 0xFF) {
+                        console.log('Valid MP3 header detected');
+                    } else {
+                        console.warn('Unexpected audio header:', header, bytes.slice(0, 10));
+                    }
+                    
+                    return bytes.buffer;
+                } catch (error) {
+                    console.error('Base64 decoding failed:', error);
+                    throw new Error('Invalid base64 audio data: ' + error.message);
+                }
+            }
+
+            showSubtitles() {
+                if (this.subtitleText) {
+                    this.elements.subtitleText.textContent = this.subtitleText;
+                    this.elements.subtitleText.classList.remove('d-none');
+                }
+            }
+
+            showProgress(text, percentage) {
+                this.elements.progressSection.classList.remove('d-none');
+                this.elements.progressBar.style.width = percentage + '%';
+                this.elements.progressText.textContent = text;
+            }
+
+            hideProgress() {
+                this.elements.progressSection.classList.add('d-none');
+            }
+
+            hideResults() {
+                this.elements.resultsSection.classList.add('d-none');
+                this.elements.errorSection.classList.add('d-none');
+            }
+
+            showError(message) {
+                this.elements.errorText.textContent = message;
+                this.elements.errorSection.classList.remove('d-none');
+                this.hideProgress();
+            }
+
+            async testAudioGeneration() {
+                this.updateStatus('processing');
+                this.showProgress('Testing audio generation...', 50);
+                
+                try {
+                    const response = await fetch('/api/test-audio');
+                    
+                    if (!response.ok) {
+                        throw new Error(`Test API Error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('Test audio response:', result);
+                    
+                    // Create test results
+                    const testResult = {
+                        transcription: "Audio generation test",
+                        text: result.text,
+                        audio: result.audio,
+                        compressed: result.compressed
+                    };
+                    
+                    this.startTime = Date.now() - 1000; // Fake timing for test
+                    await this.displayResults(testResult);
+                    this.updateStatus('ready');
+                    
+                } catch (error) {
+                    this.showError('Audio test failed: ' + error.message);
+                    this.updateStatus('error');
+                }
+            }
+
+            updateStatus(status) {
+                const indicator = this.elements.statusIndicator;
+                indicator.className = 'status-indicator';
+                
+                switch(status) {
+                    case 'ready':
+                        indicator.classList.add('status-ready');
+                        break;
+                    case 'recording':
+                        indicator.classList.add('status-processing');
+                        break;
+                    case 'processing':
+                        indicator.classList.add('status-processing');
+                        break;
+                    case 'error':
+                        indicator.classList.add('status-error');
+                        break;
+                }
+            }
+        }
+
+        // Initialize the tester when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceAITester();
+        });
+    </script>
+</body>
+</html>
