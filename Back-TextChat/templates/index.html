@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Assistant API Tester</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-desktop me-3"></i>
+                        OpenAI Assistant API Tester
+                    </h1>
+                    <p class="lead">Test the Flask API that forwards messages to OpenAI's Assistant API with ultra-fast performance</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Chat Interface
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="chatForm">
+                            <div class="mb-3">
+                                <label for="messageInput" class="form-label">Your Message</label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="messageInput" 
+                                    rows="3" 
+                                    placeholder="Type your message here..."
+                                    required
+                                ></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="streamingMode" checked>
+                                    <label class="form-check-label" for="streamingMode">
+                                        <i class="fas fa-stream me-2"></i>
+                                        Real-time streaming responses
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Get live status updates during processing for better user experience
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="sendButton">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="statusSection" class="mt-4" style="display: none;">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-hourglass-half me-2"></i>
+                                Processing Status
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="statusContent">
+                                <div class="d-flex align-items-center">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span id="statusMessage">Initializing...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="responseSection" class="mt-4" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-reply me-2"></i>
+                                AI Response
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="responseContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="errorSection" class="mt-4" style="display: none;">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> <span id="errorContent"></span>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                API Information
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <h5>Regular API Endpoint</h5>
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item"><strong>URL:</strong> <code>/api/text</code></li>
+                                <li class="list-group-item"><strong>Method:</strong> POST</li>
+                                <li class="list-group-item"><strong>Content-Type:</strong> application/json</li>
+                                <li class="list-group-item"><strong>Request Format:</strong> <code>{"message": "your message"}</code></li>
+                                <li class="list-group-item"><strong>Response Format:</strong> <code>{"reply": "AI response"}</code></li>
+                            </ul>
+
+                            <h5>Streaming API Endpoint</h5>
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item"><strong>URL:</strong> <code>/api/text/stream</code></li>
+                                <li class="list-group-item"><strong>Method:</strong> POST</li>
+                                <li class="list-group-item"><strong>Content-Type:</strong> application/json</li>
+                                <li class="list-group-item"><strong>Response Type:</strong> Server-Sent Events (text/event-stream)</li>
+                                <li class="list-group-item"><strong>Status Updates:</strong> Real-time processing status</li>
+                            </ul>
+                            
+                            <h5>Performance Features</h5>
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item"><strong>Ultra-fast polling:</strong> 0.1s initial interval</li>
+                                <li class="list-group-item"><strong>Exponential backoff:</strong> Optimized response times</li>
+                                <li class="list-group-item"><strong>Assistant ID:</strong> <code>asst_c0LRWpvZJ04MimV8SUgLYJje</code></li>
+                            </ul>
+                            
+                            <h5>Example cURL Request</h5>
+                            <pre class="bg-dark p-3 rounded"><code>curl -X POST http://localhost:5000/api/text \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello, how are you?"}'</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

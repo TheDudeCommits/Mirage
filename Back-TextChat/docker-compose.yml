@@ -1,0 +1,24 @@
+networks:
+  web_net:
+    external: true
+services:
+  askmira-text:
+    image: docker.cache.whaleintel.me/askmira-text:latest
+    container_name: askmira-text
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.askmira-text.entrypoints=http"
+      - "traefik.http.routers.askmira-text.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-text.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.askmira-text-secure.entrypoints=https"
+      - "traefik.http.routers.askmira-text-secure.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-text-secure.tls=true"
+      - "traefik.http.routers.askmira-text-secure.tls.options=default"
+      - "traefik.http.routers.askmira-text-secure.tls.certresolver=mycert"
+      - "traefik.http.services.askmira-text.loadbalancer.server.port=5000"
+    restart: always
+    networks:
+      - web_net

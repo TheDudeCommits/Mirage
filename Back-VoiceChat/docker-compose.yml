@@ -1,0 +1,24 @@
+networks:
+  web_net:
+    external: true
+services:
+  askmira-voicedetect:
+    image: docker.cache.whaleintel.me/askmira-voicedetect:latest
+    container_name: askmira-voicedetect
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.askmira-voicedetect.entrypoints=http"
+      - "traefik.http.routers.askmira-voicedetect.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-voicedetect.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.askmira-voicedetect-secure.entrypoints=https"
+      - "traefik.http.routers.askmira-voicedetect-secure.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-voicedetect-secure.tls=true"
+      - "traefik.http.routers.askmira-voicedetect-secure.tls.options=default"
+      - "traefik.http.routers.askmira-voicedetect-secure.tls.certresolver=mycert"
+      - "traefik.http.services.askmira-voicedetect.loadbalancer.server.port=3000"
+    restart: always
+    networks:
+      - web_net

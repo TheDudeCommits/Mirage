@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskMira - AI Neural Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00D4AA',
+                        dark: {
+                            100: '#2A2A2A',
+                            200: '#1A1A1A',
+                            300: '#0F1419',
+                            400: '#000000'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F1419 0%, #000000 100%);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0F1419 0%, #000000 100%);
+        }
+        
+        .toggle-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-btn:hover {
+            background-color: rgba(0, 212, 170, 0.1);
+            border-color: #00D4AA;
+        }
+        
+        .toggle-btn.active {
+            background-color: rgba(0, 212, 170, 0.2);
+            border-color: #00D4AA;
+            color: #00D4AA;
+        }
+        
+        .upload-area {
+            background: rgba(42, 42, 42, 0.5);
+            border: 2px dashed #333333;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #00D4AA;
+            background: rgba(0, 212, 170, 0.05);
+        }
+        
+        .sidebar-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .input-field {
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid #333333;
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #00D4AA;
+            box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.1);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white overflow-hidden">
+    <!-- @COMPONENT: MainLayout -->
+    <div class="flex h-screen">
+        <!-- @COMPONENT: Sidebar -->
+        <div class="w-70 bg-dark-200 border-r border-dark-100 flex flex-col">
+            <!-- New Chat Button -->
+            <div class="p-4">
+                <button class="sidebar-btn w-full flex items-center justify-center gap-2 px-4 py-3 bg-dark-100 rounded-lg text-white font-medium hover:bg-opacity-80" data-event="click:createNewChat">
+                    <i class="fas fa-plus text-sm"></i>
+                    New Chat
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="px-4 pb-4">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input 
+                        type="text" 
+                        placeholder="Search chats..." 
+                        class="input-field w-full pl-10 pr-4 py-2 rounded-lg text-white placeholder-gray-400 outline-none"
+                        data-mock="true"
+                    />
+                </div>
+            </div>
+            
+            <!-- Chat List Area -->
+            <div class="flex-1 px-4">
+                <div class="text-center text-gray-400 mt-8" data-mock="true">
+                    No chats yet
+                </div>
+            </div>
+            
+            <!-- Sign In Button -->
+            <div class="p-4">
+                <button class="w-full bg-primary text-dark-400 font-semibold py-3 rounded-lg hover:bg-opacity-90 transition-all duration-200" data-event="click:signIn">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Sign In
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+        
+        <!-- @COMPONENT: MainContent -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-center py-6">
+                <h1 class="text-4xl font-bold text-primary">AskMira</h1>
+            </div>
+            
+            <!-- Toggle Buttons -->
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <button class="toggle-btn active px-6 py-2 border border-gray-600 rounded-full text-sm font-medium" data-event="click:selectMode" data-mode="text">
+                    <i class="fas fa-keyboard mr-2"></i>
+                    TEXT
+                </button>
+                <button class="toggle-btn px-6 py-2 border border-gray-600 rounded-full text-sm font-medium text-gray-400" data-event="click:selectMode" data-mode="voice">
+                    <i class="fas fa-microphone mr-2"></i>
+                    VOICE
+                </button>
+                <button class="toggle-btn px-6 py-2 border border-gray-600 rounded-full text-sm font-medium text-gray-400" data-event="click:selectMode" data-mode="mira">
+                    <i class="fas fa-robot mr-2"></i>
+                    MIRA
+                </button>
+                <button class="toggle-btn px-6 py-2 border border-gray-600 rounded-full text-sm font-medium text-gray-400" data-event="click:selectMode" data-mode="detector">
+                    <i class="fas fa-search mr-2"></i>
+                    AI DETECTOR
+                </button>
+                <button class="toggle-btn px-6 py-2 border border-gray-600 rounded-full text-sm font-medium text-gray-400" data-event="click:selectMode" data-mode="neural">
+                    <i class="fas fa-brain mr-2"></i>
+                    NEURAL LINK
+                </button>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="flex-1 flex items-center justify-center px-8">
+                <div class="upload-area w-full max-w-2xl h-64 rounded-xl flex flex-col items-center justify-center cursor-pointer" data-event="click:uploadData">
+                    <i class="fas fa-briefcase text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-400 text-lg" data-mock="true">Initialize Neural Connection or Upload Data Package</p>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-6">
+                <div class="max-w-4xl mx-auto relative">
+                    <input 
+                        type="text" 
+                        placeholder="Enter neural data transmission..." 
+                        class="input-field w-full pl-6 pr-16 py-4 rounded-2xl text-white placeholder-gray-400 outline-none text-lg"
+                        data-mock="true"
+                        data-bind="userInput"
+                    />
+                    <button class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primary text-dark-400 p-3 rounded-xl hover:bg-opacity-90 transition-all duration-200" data-event="click:sendMessage">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+    <!-- @END_COMPONENT: MainLayout -->
+    
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Initialize toggle button state
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleButtons = document.querySelectorAll('.toggle-btn');
+                
+                toggleButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        toggleButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            btn.classList.add('text-gray-400');
+                        });
+                        
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        this.classList.remove('text-gray-400');
+                    });
+                });
+                
+                // Upload area interaction
+                const uploadArea = document.querySelector('.upload-area');
+                if (uploadArea) {
+                    uploadArea.addEventListener('click', function() {
+                        // TODO: Implement file upload functionality
+                        console.log('Upload area clicked');
+                    });
+                }
+                
+                // Input field interactions
+                const inputField = document.querySelector('input[placeholder*="neural data"]');
+                const sendButton = document.querySelector('[data-event*="sendMessage"]');
+                
+                if (inputField && sendButton) {
+                    inputField.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            // TODO: Implement send message functionality
+                            console.log('Message sent:', this.value);
+                        }
+                    });
+                    
+                    sendButton.addEventListener('click', function() {
+                        // TODO: Implement send message functionality
+                        const message = inputField.value;
+                        console.log('Message sent:', message);
+                    });
+                }
+                
+                // Sign in button
+                const signInButton = document.querySelector('[data-event*="signIn"]');
+                if (signInButton) {
+                    signInButton.addEventListener('click', function() {
+                        // TODO: Implement sign in functionality
+                        console.log('Sign in clicked');
+                    });
+                }
+                
+                // New chat button
+                const newChatButton = document.querySelector('[data-event*="createNewChat"]');
+                if (newChatButton) {
+                    newChatButton.addEventListener('click', function() {
+                        // TODO: Implement new chat functionality
+                        console.log('New chat clicked');
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

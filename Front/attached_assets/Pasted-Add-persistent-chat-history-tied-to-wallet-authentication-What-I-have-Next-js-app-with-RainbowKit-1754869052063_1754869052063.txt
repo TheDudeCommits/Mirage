@@ -1,0 +1,106 @@
+Add persistent chat history tied to wallet authentication.
+
+What I have: Next.js app with RainbowKit wallet connect working.
+What I want: When a user connects their wallet, create a secure session (SIWE) and let them create chats and messages that persist in a Postgres DB. Provide a sidebar UI to view past chats and resume them.
+
+Tech choices (please implement):
+Auth: RainbowKit + SIWE + NextAuth (no Twitter/Google). Use @rainbow-me/rainbowkit-siwe-next-auth.
+
+Add /api/auth/[...nextauth] with the SIWE Credentials provider as in RainbowKit’s SIWE example.
+
+Store session in a cookie (JWT).
+
+Expose useSession() so the app knows the connected wallet address.
+
+Database: Neon Postgres (hosted). Use Prisma.
+
+Install: prisma @prisma/client
+
+Use env DATABASE_URL for the Neon connection string.
+
+Create models and migration.
+
+Schema (Prisma) — create exactly this:
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  chats         Chat[]
+}
+model Chat {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  Message[]
+  @@index([userId, updatedAt])
+}
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role      String   // 'user' | 'assistant' | 'system'
+  content   String   // markdown/text
+  createdAt DateTime @default(now())
+  @@index([chatId, createdAt])
+}
+API routes (App Router) — create:
+
+POST /api/chats → create chat { title } and return chat.
+
+GET /api/chats → list current user’s chats (most recent first, cursor pagination with ?cursor=).
+
+PATCH /api/chats/:id → rename chat.
+
+DELETE /api/chats/:id → delete chat + messages.
+
+GET /api/chats/:id/messages → list messages (cursor).
+
+POST /api/chats/:id/messages → append message { role, content }.
+All routes must require NextAuth session and map session.user.walletAddress to a User row (create on first use).
+
+Frontend integration (Do not change or rename the current structure, use the existing ones or add new ones if needed)
+
+Chats sidebar (left) that shows the user’s chats, with:
+
+New Session button → calls POST /api/chats (autotitle with first user message if title empty).
+
+Click a chat to load its messages and continue the thread.
+
+Context menu to Rename and Delete.
+
+On send, add the user message, call the API, then show the assistant response (reuse my current response flow).
+
+Autosave: whenever a message is sent/received, persist it.
+
+Env & setup
+
+Add .env.local with placeholders and comments:
+
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=***generate strong secret***
+WALLETCONNECT_PROJECT_ID=*** (already set) ***
+DATABASE_URL=***Neon Postgres connection string***
+Create prisma/migrations and run prisma migrate dev.
+
+On dev start, log to console if DATABASE_URL or NEXTAUTH_SECRET is missing.
+
+UX
+
+If not authenticated, the sidebar shows a prompt to connect wallet.
+
+After SIWE sign-in, sidebar loads their chats.
+
+Keep styling consistent with my dark/neon theme.
+
+Safety
+
+Never trust a wallet address from the client; require an active NextAuth SIWE session for all chat/message APIs.
+
+Each query must scope by the authenticated user id.
+
+Please implement everything end-to-end, including wiring my existing “Neural Authentication” button to trigger SIWE sign-in, and add basic error toasts/logs. Provide me with clear instructions on where to paste the Neon DATABASE_URL and how to run the migration.

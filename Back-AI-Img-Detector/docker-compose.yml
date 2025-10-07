@@ -1,0 +1,24 @@
+networks:
+  web_net:
+    external: true
+services:
+  askmira-imagedetect:
+    image: docker.cache.whaleintel.me/askmira-imagedetect:latest
+    container_name: askmira-imagedetect
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.askmira-imagedetect.entrypoints=http"
+      - "traefik.http.routers.askmira-imagedetect.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-imagedetect.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.askmira-imagedetect-secure.entrypoints=https"
+      - "traefik.http.routers.askmira-imagedetect-secure.rule=Host(`${traefik_host_rule}`)"
+      - "traefik.http.routers.askmira-imagedetect-secure.tls=true"
+      - "traefik.http.routers.askmira-imagedetect-secure.tls.options=default"
+      - "traefik.http.routers.askmira-imagedetect-secure.tls.certresolver=mycert"
+      - "traefik.http.services.askmira-imagedetect.loadbalancer.server.port=5000"
+    restart: always
+    networks:
+      - web_net

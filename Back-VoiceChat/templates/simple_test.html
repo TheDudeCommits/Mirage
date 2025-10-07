@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Assistant - Quick Test</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">🎤 Voice AI Assistant - Quick Test</h1>
+                
+                <!-- API Test Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Quick API Tests</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Test Audio Generation -->
+                        <div class="mb-3">
+                            <button class="btn btn-warning btn-lg w-100" id="testAudioBtn">
+                                🔊 Test Audio Generation (Base64)
+                            </button>
+                            <button class="btn btn-outline-warning mt-2" id="testRawAudioBtn">
+                                🎵 Test Direct MP3 File
+                            </button>
+                            <button class="btn btn-outline-info mt-2" id="testWavAudioBtn">
+                                🔊 Test WAV Format
+                            </button>
+                        </div>
+                        
+                        <!-- Upload Audio File -->
+                        <div class="mb-3">
+                            <label for="audioFile" class="form-label">Upload Audio File:</label>
+                            <input type="file" class="form-control" id="audioFile" accept="audio/*">
+                        </div>
+                        
+                        <!-- Send to Full Pipeline -->
+                        <div class="mb-3">
+                            <button class="btn btn-success btn-lg w-100" id="fullPipelineBtn" disabled>
+                                🚀 Test Full Voice Pipeline
+                            </button>
+                        </div>
+                        
+                        <!-- Progress Section -->
+                        <div id="progressSection" class="d-none mb-3">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="progressBar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="progressText" class="text-muted">Processing...</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="card d-none" id="resultsSection">
+                    <div class="card-header">
+                        <h5>Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Transcription -->
+                        <div class="mb-3">
+                            <label class="form-label">Transcription:</label>
+                            <div class="border p-3 rounded bg-light" id="transcription">Loading...</div>
+                        </div>
+                        
+                        <!-- AI Response Text -->
+                        <div class="mb-3">
+                            <label class="form-label">AI Response:</label>
+                            <div class="border p-3 rounded bg-light" id="aiResponse">Loading...</div>
+                        </div>
+                        
+                        <!-- Audio Player -->
+                        <div class="mb-3">
+                            <label class="form-label">AI Audio Response:</label>
+                            <audio controls class="w-100" id="audioPlayer" preload="metadata">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <button class="btn btn-sm btn-outline-secondary mt-2" id="downloadAudio" style="display: none;">
+                                📥 Download Audio
+                            </button>
+                        </div>
+                        
+                        <!-- Performance Stats -->
+                        <div class="row text-center mt-3">
+                            <div class="col-4">
+                                <small class="text-muted">Total Time:</small><br>
+                                <span id="totalTime">-</span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Compressed:</small><br>
+                                <span id="compressed">-</span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Audio Size:</small><br>
+                                <span id="audioSize">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Section -->
+                <div class="alert alert-danger d-none" id="errorSection">
+                    <strong>Error:</strong> <span id="errorMessage"></span>
+                </div>
+                
+                <!-- Links -->
+                <div class="text-center mt-4">
+                    <a href="/test" class="btn btn-outline-secondary">Full Interface</a>
+                    <a href="/health" class="btn btn-outline-info">Health Check</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SimpleVoiceTest {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.elements = {
+                    testAudioBtn: document.getElementById('testAudioBtn'),
+                    testRawAudioBtn: document.getElementById('testRawAudioBtn'),
+                    testWavAudioBtn: document.getElementById('testWavAudioBtn'),
+                    audioFile: document.getElementById('audioFile'),
+                    fullPipelineBtn: document.getElementById('fullPipelineBtn'),
+                    progressSection: document.getElementById('progressSection'),
+                    progressBar: document.getElementById('progressBar'),
+                    progressText: document.getElementById('progressText'),
+                    resultsSection: document.getElementById('resultsSection'),
+                    transcription: document.getElementById('transcription'),
+                    aiResponse: document.getElementById('aiResponse'),
+                    audioPlayer: document.getElementById('audioPlayer'),
+                    totalTime: document.getElementById('totalTime'),
+                    compressed: document.getElementById('compressed'),
+                    audioSize: document.getElementById('audioSize'),
+                    errorSection: document.getElementById('errorSection'),
+                    errorMessage: document.getElementById('errorMessage'),
+                    downloadAudio: document.getElementById('downloadAudio')
+                };
+                
+                this.bindEvents();
+            }
+            
+            bindEvents() {
+                this.elements.testAudioBtn.addEventListener('click', () => this.testAudio());
+                this.elements.testRawAudioBtn.addEventListener('click', () => this.testRawAudio());
+                this.elements.testWavAudioBtn.addEventListener('click', () => this.testWavAudio());
+                this.elements.audioFile.addEventListener('change', () => this.handleFileUpload());
+                this.elements.fullPipelineBtn.addEventListener('click', () => this.testFullPipeline());
+            }
+            
+            handleFileUpload() {
+                const file = this.elements.audioFile.files[0];
+                this.elements.fullPipelineBtn.disabled = !file;
+            }
+            
+            async testAudio() {
+                this.showProgress('Testing audio generation...', 50);
+                this.startTime = Date.now();
+                
+                try {
+                    const response = await fetch('/api/test-audio');
+                    
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    this.showProgress('Complete!', 100);
+                    
+                    setTimeout(() => {
+                        this.displayResults({
+                            transcription: "Audio generation test",
+                            text: result.text,
+                            audio: result.audio,
+                            compressed: result.compressed,
+                            size_bytes: result.size_bytes
+                        });
+                    }, 500);
+                    
+                } catch (error) {
+                    this.showError('Audio test failed: ' + error.message);
+                }
+            }
+            
+            async testFullPipeline() {
+                const file = this.elements.audioFile.files[0];
+                if (!file) return;
+                
+                this.showProgress('Processing audio through full pipeline...', 25);
+                this.startTime = Date.now();
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('audio', file);
+                    
+                    this.showProgress('Transcribing...', 33);
+                    
+                    const response = await fetch('/api/voice', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    this.showProgress('Generating response...', 66);
+                    
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    this.showProgress('Complete!', 100);
+                    
+                    setTimeout(() => {
+                        this.displayResults(result);
+                    }, 500);
+                    
+                } catch (error) {
+                    this.showError('Pipeline test failed: ' + error.message);
+                }
+            }
+            
+            async displayResults(result) {
+                this.hideProgress();
+                
+                // Display text results
+                this.elements.transcription.textContent = result.transcription || 'No transcription available';
+                this.elements.aiResponse.textContent = result.text || 'No response text available';
+                
+                // Handle audio data - no compression anymore
+                try {
+                    const audioData = result.audio;
+                    
+                    // Create audio blob with proper MIME type based on format
+                    const audioBytes = this.base64ToArrayBuffer(audioData);
+                    const mimeType = result.format === 'wav' ? 'audio/wav' : 'audio/mpeg';
+                    const audioBlob = new Blob([audioBytes], { type: mimeType });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    this.elements.audioPlayer.src = audioUrl;
+                    this.elements.audioPlayer.load();
+                    
+                    // Setup download link
+                    this.elements.downloadAudio.style.display = 'inline-block';
+                    this.elements.downloadAudio.onclick = () => {
+                        const link = document.createElement('a');
+                        link.href = audioUrl;
+                        link.download = 'ai_response.mp3';
+                        link.click();
+                    };
+                    
+                    // Add comprehensive audio event handling
+                    this.elements.audioPlayer.onerror = (e) => {
+                        const error = this.elements.audioPlayer.error;
+                        let errorMessage = 'Audio playback failed';
+                        if (error) {
+                            switch(error.code) {
+                                case error.MEDIA_ERR_ABORTED:
+                                    errorMessage = 'Audio playback aborted';
+                                    break;
+                                case error.MEDIA_ERR_NETWORK:
+                                    errorMessage = 'Network error during audio playback';
+                                    break;
+                                case error.MEDIA_ERR_DECODE:
+                                    errorMessage = 'Audio decode error - invalid format or corrupted data';
+                                    break;
+                                case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                                    errorMessage = 'Audio format not supported by browser';
+                                    break;
+                                default:
+                                    errorMessage = `Audio error (code ${error.code}): ${error.message || 'Unknown error'}`;
+                            }
+                        }
+                        console.error('Audio playback error:', e, error);
+                        this.showError(errorMessage + '. Try downloading the file or using the "Direct MP3" test.');
+                    };
+                    
+                    this.elements.audioPlayer.oncanplaythrough = () => {
+                        console.log('Audio can play through without buffering');
+                    };
+                    
+                    this.elements.audioPlayer.onloadedmetadata = () => {
+                        console.log('Audio metadata loaded, duration:', this.elements.audioPlayer.duration);
+                    };
+                    
+                    // Display stats
+                    const totalTime = Date.now() - this.startTime;
+                    this.elements.totalTime.textContent = `${totalTime}ms`;
+                    this.elements.compressed.textContent = result.compressed ? 'Yes' : 'No';
+                    this.elements.audioSize.textContent = result.size_bytes ? 
+                        `${Math.round(result.size_bytes/1024)}KB` : `${Math.round(audioBlob.size/1024)}KB`;
+                    
+                    console.log('Audio loaded successfully, size:', audioBlob.size, 'bytes');
+                    
+                } catch (error) {
+                    console.error('Error processing audio:', error);
+                    this.showError('Failed to process audio: ' + error.message);
+                    return;
+                }
+                
+                this.elements.resultsSection.classList.remove('d-none');
+            }
+            
+            // Decompression function removed - no longer needed
+            
+            base64ToArrayBuffer(base64) {
+                try {
+                    // Clean the base64 string
+                    const cleanBase64 = base64.replace(/[^A-Za-z0-9+/]/g, '');
+                    
+                    // Add padding if needed
+                    const paddedBase64 = cleanBase64 + '='.repeat((4 - cleanBase64.length % 4) % 4);
+                    
+                    // Decode to binary string
+                    const binaryString = atob(paddedBase64);
+                    
+                    // Convert to Uint8Array
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    
+                    console.log('Base64 decoded successfully, size:', bytes.length, 'bytes');
+                    
+                    // Verify it looks like MP3 (starts with ID3 or FF FB)
+                    const header = new TextDecoder().decode(bytes.slice(0, 3));
+                    if (header === 'ID3' || bytes[0] === 0xFF) {
+                        console.log('Valid MP3 header detected');
+                    } else {
+                        console.warn('Unexpected audio header:', header, bytes.slice(0, 10));
+                    }
+                    
+                    return bytes.buffer;
+                } catch (error) {
+                    console.error('Base64 decoding failed:', error);
+                    throw new Error('Invalid base64 audio data: ' + error.message);
+                }
+            }
+            
+            showProgress(text, percentage) {
+                this.elements.progressSection.classList.remove('d-none');
+                this.elements.progressBar.style.width = percentage + '%';
+                this.elements.progressText.textContent = text;
+                this.elements.resultsSection.classList.add('d-none');
+                this.elements.errorSection.classList.add('d-none');
+            }
+            
+            hideProgress() {
+                this.elements.progressSection.classList.add('d-none');
+            }
+            
+            testRawAudio() {
+                this.showProgress('Testing direct MP3 file...', 50);
+                
+                // Load raw MP3 directly into audio player
+                const rawAudioUrl = '/api/test-audio-raw';
+                this.elements.audioPlayer.src = rawAudioUrl;
+                this.elements.audioPlayer.load();
+                
+                // Set up results display
+                this.elements.transcription.textContent = "Raw MP3 file test";
+                this.elements.aiResponse.textContent = "This is a direct MP3 file test.";
+                this.elements.totalTime.textContent = "N/A";
+                this.elements.compressed.textContent = "No";
+                this.elements.audioSize.textContent = "Unknown";
+                
+                // Show download link for raw file
+                this.elements.downloadAudio.style.display = 'inline-block';
+                this.elements.downloadAudio.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = rawAudioUrl;
+                    link.download = 'test_direct.mp3';
+                    link.click();
+                };
+                
+                this.showProgress('Complete!', 100);
+                setTimeout(() => {
+                    this.hideProgress();
+                    this.elements.resultsSection.classList.remove('d-none');
+                }, 500);
+            }
+
+            async testWavAudio() {
+                this.showProgress('Testing WAV format...', 50);
+                this.startTime = Date.now();
+                
+                try {
+                    const response = await fetch('/api/test-audio-wav');
+                    
+                    if (!response.ok) {
+                        throw new Error(`WAV API Error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    this.showProgress('Complete!', 100);
+                    
+                    setTimeout(() => {
+                        this.displayResults({
+                            transcription: "WAV format test",
+                            text: result.text,
+                            audio: result.audio,
+                            compressed: result.compressed,
+                            format: result.format,
+                            size_bytes: result.size_bytes
+                        });
+                    }, 500);
+                    
+                } catch (error) {
+                    this.showError('WAV test failed: ' + error.message);
+                }
+            }
+
+            showError(message) {
+                this.elements.errorMessage.textContent = message;
+                this.elements.errorSection.classList.remove('d-none');
+                this.hideProgress();
+            }
+        }
+        
+        // Initialize the test interface
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimpleVoiceTest();
+        });
+    </script>
+</body>
+</html>

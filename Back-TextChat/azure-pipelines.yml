@@ -1,0 +1,133 @@
+trigger:
+  - main
+  - dev
+
+stages:
+  - stage: Build
+    displayName: Build Application
+    pool:
+      name: Default
+
+    jobs:
+      - job: build
+        displayName: Build Application Dockerfile
+        variables:
+          - name: registryUrl
+            value: docker.cache.whaleintel.me
+          - name: imageName
+            value: askmira-text
+          - name: presentationImageName
+            value: $(registryUrl)/$(imageName)
+
+        steps:
+          - task: Docker@2
+            displayName: Login to Docker registry
+            inputs:
+              command: login
+              containerRegistry: Docker-Connection
+
+          - script: |
+              if ! command -v jq > /dev/null 2>&1; then
+                echo "jq not found. Installing..."
+                apt install jq
+              else
+                echo "jq already installed. Skipping."
+              fi
+            displayName: "Ensure jq is installed"
+
+          - script: |
+              VERSION=$(grep -A 5 "^\[project\]" pyproject.toml | grep "^version" | cut -d '"' -f2)
+              echo $VERSION
+              echo "##vso[task.setvariable variable=PACKAGE_VERSION]$VERSION"
+            displayName: "Read version from project.toml"
+            failOnStderr: true
+
+          - script: |
+              VERSION=$(grep -A 5 "^\[project\]" pyproject.toml | grep "^version" | cut -d '"' -f2)
+              IMAGE=$(presentationImageName):$VERSION
+              if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+                echo "Docker image with tag $VERSION already exists in the registry!"
+                exit 1
+              fi
+            displayName: "Fail if Docker image with current version already exists"
+
+          - task: Docker@2
+            displayName: Build Image
+            inputs:
+              command: build
+              Dockerfile: ./Dockerfile
+              repository: $(imageName)
+              tags: $(PACKAGE_VERSION)
+              arguments: |
+                --network=host
+
+          - task: Docker@2
+            displayName: Push builded image to docker registry
+            inputs:
+              command: push
+              repository: $(imageName)
+              tags: $(PACKAGE_VERSION)
+
+          - script: |
+              VERSION=$(grep -A 5 "^\[project\]" pyproject.toml | grep "^version" | cut -d '"' -f2)
+              sed -i "s/:latest/:$VERSION/g" docker-compose.yml
+            displayName: "Replace latest with version in docker-compose"
+            failOnStderr: true
+
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: .
+              Contents: docker-compose.yml
+              TargetFolder: $(Build.ArtifactStagingDirectory)
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish build artifact"
+            inputs:
+              PathtoPublish: $(Build.ArtifactStagingDirectory)
+              ArtifactName: $(Build.SourceBranchName)
+
+
+  - stage: MainDeploy
+    displayName: Deploy on Main
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    dependsOn: Build
+    jobs:
+      - deployment:
+        environment:
+          name: AskmiraProd
+          resourceType: VirtualMachine
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+
+                - task: Docker@2
+                  displayName: login to repository
+                  inputs:
+                    command: login
+                    containerRegistry: Docker-Connection
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: Download build artifact
+                  inputs:
+                    buildType: current
+                    downloadPath: $(System.ArtifactsDirectory)
+                    artifactName: $(Build.SourceBranchName)
+
+                - task: DownloadSecureFile@1
+                  name: DevSecureFile
+                  displayName: "Download env as a secure file"
+                  inputs:
+                    secureFile: "AskMiraText.env"
+
+                - script: |
+                    cp $(DevSecureFile.secureFilePath) $(System.ArtifactsDirectory)/$(Build.SourceBranchName)/.env
+                  displayName: Set environment variables
+
+                - script: docker compose -f $(System.ArtifactsDirectory)/$(Build.SourceBranchName)/docker-compose.yml pull
+                  displayName: pull latest image
+
+                - script: docker compose --env-file=$(DevSecureFile.secureFilePath) -f $(System.ArtifactsDirectory)/$(Build.SourceBranchName)/docker-compose.yml up -d --pull always --force-recreate
+                  displayName: up new version
+                  condition: always()

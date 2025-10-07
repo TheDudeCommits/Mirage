@@ -1,0 +1,28 @@
+[project]
+name = "askmirabackendtextdetect"
+version = "1.0.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0.3",
+    "flask-cors>=5.0.0",
+    "gunicorn>=23.0.0",
+    "python-docx>=1.1.2",
+    "python-dotenv>=1.0.1",
+    "transformers>=4.46.3",
+    "torch>=1.9.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu" },
+]
+torchvision = [
+  { index = "pytorch-cpu" },
+]

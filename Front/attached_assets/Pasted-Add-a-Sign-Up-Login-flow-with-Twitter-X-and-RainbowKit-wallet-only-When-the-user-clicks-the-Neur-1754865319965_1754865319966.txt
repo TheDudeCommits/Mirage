@@ -1,0 +1,78 @@
+Add a Sign Up/Login flow with Twitter (X) and RainbowKit wallet only.
+When the user clicks the “Neural Authentication” button, open a modal with two options:
+Continue with X (Twitter) and Connect Wallet (RainbowKit).
+
+Please do the following end-to-end (I have zero coding knowledge):
+
+Install + configure NextAuth for Twitter/X only.
+
+Packages: next-auth
+
+Provider: import TwitterProvider from "next-auth/providers/twitter" (OAuth 2.0).
+
+Use JWT sessions (default).
+
+API route /api/auth/[...nextauth].ts (or App Router equivalent) with only Twitter provider.
+
+Read env vars: TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, NEXTAUTH_SECRET.
+
+Callback URL must be /api/auth/callback/twitter.
+
+Install + configure RainbowKit (WalletConnect v2).
+
+Packages: @rainbow-me/rainbowkit wagmi viem
+
+Use getDefaultConfig and RainbowKitProvider with WalletConnect projectId from env WALLETCONNECT_PROJECT_ID.
+
+Support at least mainnet (you can also include base if easy).
+
+Show a “Connect Wallet” button in the modal using RainbowKit’s ConnectButton.
+
+UI/Modal integration.
+
+Convert my “Neural Authentication” button to open a modal.
+
+Inside the modal, show two big buttons:
+
+“Continue with X (Twitter)” → signIn("twitter")
+
+“Connect Wallet” → RainbowKit ConnectButton
+
+If the user is authenticated via Twitter OR has a connected wallet, close the modal and update the header button to show:
+
+Twitter display name (or @handle) or the short wallet address; include a small dropdown with “Sign out” and “Disconnect”.
+
+State handling.
+
+If both are present, prefer showing the Twitter name.
+
+Expose the connected wallet address on the client (e.g., window.__walletAddress or a small Zustand store) so I can use it later.
+
+Styling.
+
+Match my dark/neon theme (minimal, clean).
+
+.env setup.
+
+Create .env.local with placeholders and comments:
+
+ini
+Copy
+Edit
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=***generate a strong secret***
+TWITTER_CLIENT_ID=***
+TWITTER_CLIENT_SECRET=***
+WALLETCONNECT_PROJECT_ID=***
+Print to console on startup which providers are enabled and warn if any env vars are missing.
+
+Docs in comments for me:
+
+Where to paste the Twitter callback URL in the Twitter Developer Portal.
+
+Where to get the WalletConnect Project ID (cloud.walletconnect.com).
+
+How to change NEXTAUTH_URL for production.
+
+Finally, add quick console logs on successful sign in or wallet connect, and wire the modal to my existing Neural Authentication button without breaking current layout.
+

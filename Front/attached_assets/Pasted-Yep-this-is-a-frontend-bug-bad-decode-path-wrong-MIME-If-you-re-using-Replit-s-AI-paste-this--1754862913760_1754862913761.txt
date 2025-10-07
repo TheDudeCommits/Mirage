@@ -1,0 +1,76 @@
+Yep—this is a frontend bug (bad decode path / wrong MIME). If you’re using Replit’s AI, paste this **exact** prompt and let it refactor:
+
+---
+
+**Prompt for Replit AI (copy–paste):**
+
+> Fix audio playback for my Voice API.
+> Search the frontend for any code that fetches TTS/voice audio (endpoints like `/api/voice`, `/voice`, `tts`, etc.).
+> **If the endpoint returns raw audio bytes:**
+>
+> 1. Use `fetch(url)` → `res.arrayBuffer()` (do NOT use `res.json()` or `res.text()`).
+> 2. Read `res.headers.get('Content-Type')` and pass that as the Blob `type`.
+> 3. Build a Blob and object URL, create/play an `<audio>` element on a user click.
+> 4. Add robust error logging for the media element.
+>    **If the endpoint returns base64 in JSON:**
+> 5. Parse JSON, base64-decode to `Uint8Array`, Blob it with the *correct* MIME (`audio/mpeg` or `audio/ogg; codecs=opus`).
+> 6. Then create the object URL and play as above.
+>    Also:
+>
+> * Make sure `audio.play()` is triggered only from a user gesture (button click) to satisfy autoplay policies.
+> * If the server sends OGG/Opus, use `audio/ogg; codecs=opus`; if it’s MP3, use `audio/mpeg`. Do not mismatch.
+> * Add a helper `playApiAudio(url)` and replace current usages.
+> * Keep CORS intact and don’t log or append any text before/after the binary response on the server.
+>
+> Here’s the code I want you to create/use:
+>
+> ```ts
+> // utils/playApiAudio.ts
+> export async function playApiAudio(url: string) {
+>   const res = await fetch(url);
+>   const ct = res.headers.get('Content-Type') || 'audio/mpeg';
+>   let blob: Blob;
+>   if (ct.includes('application/json')) {
+>     const { audio_base64 } = await res.json();
+>     const binary = atob(audio_base64);
+>     const bytes = new Uint8Array(binary.length);
+>     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+>     const mime = /ogg|opus/.test(audio_base64) ? 'audio/ogg; codecs=opus' : 'audio/mpeg';
+>     blob = new Blob([bytes], { type: mime });
+>   } else {
+>     const buf = await res.arrayBuffer();
+>     blob = new Blob([buf], { type: ct });
+>   }
+>   const urlObj = URL.createObjectURL(blob);
+>   const audio = new Audio(urlObj);
+>   audio.addEventListener('error', (e) => console.error('HTMLMediaElement error', audio.error));
+>   await audio.play();
+> }
+> ```
+>
+> And wire it to a button so playback happens on click:
+>
+> ```tsx
+> // components/VoiceButton.tsx
+> import { playApiAudio } from '@/utils/playApiAudio';
+> export default function VoiceButton() {
+>   const onClick = async () => {
+>     try {
+>       await playApiAudio('/api/voice'); // adjust path
+>     } catch (err) {
+>       console.error('Audio playback failed', err);
+>     }
+>   };
+>   return <button onClick={onClick}>Play Voice</button>;
+> }
+> ```
+>
+> Replace existing audio-fetch code with this helper, ensure MIME matches the real codec, and remove any uses of `res.text()`/`res.json()` on raw-audio endpoints.
+> Finally, print the `Content-Type` to console when playing so I can verify it.
+>
+> ```
+> ```
+
+---
+
+Run it, then verify in the console you see the correct `Content-Type` and no `MEDIA_ERR_SRC_NOT_SUPPORTED`/`FFmpegDemuxer` errors. If you still see errors, tell me what `Content-Type` prints and I’ll tweak the MIME handling.
