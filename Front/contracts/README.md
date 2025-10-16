@@ -364,3 +364,4 @@ This contract is part of the AskMira project. For contributions:
 
 **Built with ❤️ for AskMira AI Detection Platform**
 
+

@@ -5,10 +5,20 @@ import OpenAI from "openai";
 import { uploadDetectionToIPFS, fetchDetectionFromIPFS, pinToIPFS, generateContentHash, type AIDetectionMetadata } from "./ipfs";
 import { getVerificationFromChain, getUserVerifications, isContentVerified, getVerificationFee } from "./blockchain";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY environment variable is not set");
+    }
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // OpenAI pre-analysis endpoint for text detection
@@ -31,6 +41,7 @@ No extra explanations, JUST THE LABEL.
 Text to analyze:
 ${text}`;
 
+      const openai = getOpenAIClient();
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [

@@ -25,7 +25,7 @@ function getEnvVars() {
     TWITTER_CONSUMER_KEY: process.env.TWITTER_CLIENT_ID,
     TWITTER_CONSUMER_SECRET: process.env.TWITTER_CLIENT_SECRET,
     JWT_SECRET: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
-    BASE_URL: process.env.NEXTAUTH_URL || 'http://localhost:5000'
+    BASE_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000'
   };
 }
 
@@ -58,8 +58,14 @@ function initializeAuth() {
   return { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, JWT_SECRET, BASE_URL };
 }
 
-// Initialize when module loads
-const envVars = initializeAuth();
+// Lazy initialization - only initialize when accessed
+let envVars: ReturnType<typeof initializeAuth> | null = null;
+function getInitializedEnvVars() {
+  if (!envVars) {
+    envVars = initializeAuth();
+  }
+  return envVars;
+}
 
 // Configure Twitter Strategy (OAuth 1.0a - more stable than OAuth 2.0)
 // Use a function to get fresh env vars at runtime
@@ -68,7 +74,7 @@ function configureTwitterStrategy() {
   // Use localhost for development since it's now added to Twitter app
   const baseUrl = process.env.NODE_ENV === 'production' 
     ? 'https://askmira.io' 
-    : 'http://localhost:5000'; // Development uses localhost (now configured in Twitter app)
+    : (process.env.NEXTAUTH_URL || 'http://localhost:3000'); // Development uses localhost (now configured in Twitter app)
     
   return new TwitterStrategy({
     consumerKey: freshEnvVars.TWITTER_CONSUMER_KEY || 'demo-key',
@@ -94,8 +100,9 @@ function configureTwitterStrategy() {
   });
 }
 
-// Initialize Twitter strategy with current environment
-passport.use(configureTwitterStrategy());
+// Don't initialize Twitter strategy immediately - wait for dotenv to load
+// The strategy will be initialized by reloadAuth.ts after environment variables are loaded
+// This prevents the "MISSING credentials" error
 
 // Serialize user for session
 passport.serializeUser((user: any, done: Function) => {
@@ -117,13 +124,13 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
 // Generate JWT token
 export const generateAuthToken = (user: AuthenticatedUser): string => {
-  return jwt.sign(user, envVars.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(user, getInitializedEnvVars().JWT_SECRET, { expiresIn: '7d' });
 };
 
 // Verify JWT token
 export const verifyAuthToken = (token: string): AuthenticatedUser | null => {
   try {
-    return jwt.verify(token, envVars.JWT_SECRET) as AuthenticatedUser;
+    return jwt.verify(token, getInitializedEnvVars().JWT_SECRET) as AuthenticatedUser;
   } catch (error) {
     console.error('JWT verification failed:', error);
     return null;

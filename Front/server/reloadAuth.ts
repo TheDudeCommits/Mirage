@@ -9,7 +9,7 @@ export function reloadTwitterStrategy() {
   // Use localhost for development since it's now added to Twitter app
   const BASE_URL = process.env.NODE_ENV === 'production' 
     ? 'https://askmira.io' 
-    : 'http://localhost:5000'; // Development uses localhost (now configured in Twitter app)
+    : (process.env.NEXTAUTH_URL || 'http://localhost:3000'); // Development uses localhost (now configured in Twitter app)
 
   console.log('🔄 Reloading Twitter strategy with fresh env vars:', {
     TWITTER_CLIENT_ID: TWITTER_CONSUMER_KEY ? 'SET' : 'MISSING',
