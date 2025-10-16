@@ -1,0 +1,7 @@
+{
+  "name": "askmira-contracts",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "Smart contracts for AskMira AI Detection Platform",
+  "private": true
+}
