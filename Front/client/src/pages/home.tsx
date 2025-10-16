@@ -136,6 +136,16 @@ export default function Home() {
   } | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // IPFS/Blockchain storage states
+  const [isStoringOnChain, setIsStoringOnChain] = useState(false);
+  const [storageNotification, setStorageNotification] = useState<{
+    show: boolean;
+    type: 'success' | 'info' | 'error';
+    message: string;
+    ipfsCid?: string;
+    ipfsUrl?: string;
+  }>({ show: false, type: 'success', message: '' });
 
   const modes = [
     { id: "text" as Mode, label: "TEXT", icon: MessageSquare },
@@ -361,6 +371,92 @@ export default function Home() {
         fileName: file?.name
       });
       throw error;
+    }
+  }
+
+  // Store detection result on IPFS and blockchain
+  async function storeDetectionOnChain(
+    content: string,
+    detectionResult: { probability: number; label: string; imageInfo?: any },
+    detectionType: 'text' | 'image' | 'voice'
+  ) {
+    if (!walletAddress) {
+      console.warn("Wallet not connected, skipping blockchain storage");
+      setStorageNotification({
+        show: true,
+        type: 'info',
+        message: '💡 Connect wallet to store verification on blockchain'
+      });
+      setTimeout(() => setStorageNotification({ show: false, type: 'success', message: '' }), 4000);
+      return null;
+    }
+
+    setIsStoringOnChain(true);
+    try {
+      console.log(`📦 Storing ${detectionType} detection on IPFS/blockchain...`);
+      
+      const response = await fetch('/api/detection/prepare-storage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content,
+          detectionResult: {
+            probability: detectionResult.probability,
+            label: detectionResult.label,
+            modelUsed: detectionType === 'image' 
+              ? 'SuSy Image Detection Model' 
+              : detectionType === 'voice'
+              ? 'Voice Detection Model'
+              : 'AI Text Detection Model'
+          },
+          detectionType,
+          userAddress: walletAddress,
+          imageInfo: detectionResult.imageInfo
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Storage failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Detection stored:', result);
+      
+      // Show success notification
+      if (result.alreadyVerified) {
+        setStorageNotification({
+          show: true,
+          type: 'info',
+          message: '✨ This content was already verified on blockchain!',
+          ipfsCid: result.verification?.ipfsCid
+        });
+      } else {
+        setStorageNotification({
+          show: true,
+          type: 'success',
+          message: '✅ Detection stored on IPFS and ready for blockchain!',
+          ipfsCid: result.ipfsCid,
+          ipfsUrl: result.ipfsUrl
+        });
+      }
+      
+      // Auto-hide notification after 8 seconds
+      setTimeout(() => setStorageNotification({ show: false, type: 'success', message: '' }), 8000);
+      
+      return result;
+    } catch (error) {
+      console.error('Error storing detection:', error);
+      setStorageNotification({
+        show: true,
+        type: 'error',
+        message: '⚠️ Failed to store on blockchain. Detection result is still valid.'
+      });
+      setTimeout(() => setStorageNotification({ show: false, type: 'success', message: '' }), 5000);
+      return null;
+    } finally {
+      setIsStoringOnChain(false);
     }
   }
 
@@ -728,11 +824,47 @@ export default function Home() {
     setDetectorResult(null);
 
     try {
+      // Step 1: Detect AI content
       const result = await detectAIContent(
         detectorText.trim() || undefined,
         detectorFile || undefined,
       );
       setDetectorResult(result);
+
+      // Step 2: Store on IPFS/blockchain (if wallet is connected)
+      if (walletConnected && walletAddress) {
+        // Get the content to store
+        let contentToStore = detectorText.trim();
+        
+        // If it's a file, we need to read it or use a reference
+        if (detectorFile && activeDetectorMode === "text") {
+          // For text files, we already have the content
+          contentToStore = detectorText.trim() || `[File: ${detectorFile.name}]`;
+        } else if (detectorFile && activeDetectorMode === "image") {
+          // For images, store a reference
+          contentToStore = `[Image: ${detectorFile.name}, Size: ${detectorFile.size} bytes]`;
+        }
+
+        // Store in background (don't block UI)
+        storeDetectionOnChain(
+          contentToStore,
+          result,
+          activeDetectorMode as 'text' | 'image' | 'voice'
+        ).catch(err => {
+          console.error('Background storage failed:', err);
+        });
+      } else if (!walletConnected) {
+        // Show info message if wallet not connected
+        setTimeout(() => {
+          setStorageNotification({
+            show: true,
+            type: 'info',
+            message: '💡 Connect your wallet to store verification on blockchain'
+          });
+          setTimeout(() => setStorageNotification({ show: false, type: 'success', message: '' }), 4000);
+        }, 1000);
+      }
+
     } catch (error) {
       console.error("Detection error:", error);
       alert("Error analyzing content. Please try again.");
@@ -752,6 +884,53 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-[var(--askmira-dark-300)] to-[var(--askmira-dark-400)] text-white">
+      {/* IPFS Storage Notification Popup */}
+      {storageNotification.show && (
+        <div className="fixed top-20 right-6 z-[100] animate-in slide-in-from-top-5 duration-300">
+          <div className={`
+            min-w-[320px] max-w-[500px] p-4 rounded-lg shadow-2xl border-2
+            backdrop-blur-md
+            ${storageNotification.type === 'success' ? 'bg-green-900/90 border-green-500' : ''}
+            ${storageNotification.type === 'info' ? 'bg-blue-900/90 border-blue-500' : ''}
+            ${storageNotification.type === 'error' ? 'bg-red-900/90 border-red-500' : ''}
+          `}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-white font-medium mb-2">
+                  {storageNotification.message}
+                </p>
+                {storageNotification.ipfsCid && (
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-300">CID:</span>
+                      <code className="text-yellow-300 bg-black/30 px-2 py-1 rounded font-mono text-[10px]">
+                        {storageNotification.ipfsCid.substring(0, 20)}...
+                      </code>
+                    </div>
+                    {storageNotification.ipfsUrl && (
+                      <a
+                        href={storageNotification.ipfsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200 underline"
+                      >
+                        View on IPFS →
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setStorageNotification({ show: false, type: 'success', message: '' })}
+                className="text-white/70 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Mobile Menu Button */}
       <Button
         className="fixed top-4 left-4 z-50 md:hidden p-2"
@@ -1927,6 +2106,18 @@ export default function Home() {
                                   ? "This content appears to be generated by artificial intelligence."
                                   : "This content appears to be written by a human."}
                               </p>
+
+                              {/* Storage Status Indicator */}
+                              {isStoringOnChain && (
+                                <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500/50 rounded-lg max-w-md mx-auto">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                                    <p className="text-sm text-blue-200 font-mono">
+                                      Storing on IPFS & Blockchain...
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
