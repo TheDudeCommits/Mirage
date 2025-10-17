@@ -10,6 +10,7 @@ import { setupVite, serveStatic, log } from "./vite";
 // Import auth AFTER environment variables are loaded
 import passport from "./auth";
 import authRoutes from "./authRoutes";
+import { reloadTwitterStrategy } from "./reloadAuth";
 
 const app = express();
 app.use(express.json());
@@ -36,7 +37,6 @@ app.use('/api', authRoutes);
 
 // Reload Twitter auth strategy immediately after environment variables are loaded
 try {
-  const { reloadTwitterStrategy } = require('./reloadAuth.js');
   reloadTwitterStrategy();
 } catch (err) {
   console.log('⚠️ Twitter strategy reload not available:', err);
