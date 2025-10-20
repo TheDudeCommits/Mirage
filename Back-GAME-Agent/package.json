@@ -1,0 +1,27 @@
+{
+  "name": "game-agent-twitter-verifier",
+  "version": "1.0.0",
+  "description": "Autonomous GAME agent for Twitter content authenticity verification",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@virtuals-protocol/game": "github:game-by-virtuals/game-node#main",
+    "twitter-api-v2": "^1.17.2",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.16.11",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
+
