@@ -19,6 +19,7 @@ export const config = {
   // Backend APIs
   backends: {
     textDetectorUrl: process.env.TEXT_DETECTOR_API_URL || 'http://localhost:5001/api/detect',
+    textDetectorAllowedOrigins: process.env.TEXT_DETECTOR_ALLOWED_ORIGINS || '',
     imageDetectorUrl: process.env.IMAGE_DETECTOR_API_URL || 'http://localhost:5002/detect',
   },
   
