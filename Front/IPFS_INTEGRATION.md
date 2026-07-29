@@ -186,14 +186,14 @@ Visit: https://www.infura.io/
 
 ```bash
 # IPFS Configuration
-IPFS_HOST=ipfs.infura.io
-IPFS_PROJECT_ID=your_project_id_here
-IPFS_API_KEY=your_api_key_here
+IPFS_HOST=<set-in-local-env>
+IPFS_PROJECT_ID=<set-in-local-env>
+IPFS_API_KEY=<set-in-local-env>
 
 # Blockchain
-VITE_CONTRACT_ADDRESS=0x64594731c7611C24E045188768BFfb1Ed1Ff71E7
-VITE_CHAIN_ID=84532
-BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+VITE_CONTRACT_ADDRESS=<set-in-local-env>
+VITE_CHAIN_ID=<set-in-local-env>
+BASE_SEPOLIA_RPC_URL=<set-in-local-env>
 ```
 
 ### 3. Deploy Contract (If Not Done)

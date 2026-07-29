@@ -3,17 +3,17 @@
 ## Prerequisites
 
 1. **Twitter Developer Account**
-   - Login: Amirworks69@gmail.com
-   - Password: VeriFiMirage@2025
+   - Login: <provider-account-email>
+   - Password: <enter-interactively>
 
 2. **Required API Keys**
-   - GAME API Key: `apt-a2b47a408c4ccd7b160ee49c751fd741`
+   - GAME API Key: set via GAME_API_KEY in the local environment
    - Twitter API credentials (see below)
 
 ## Step 1: Get Twitter API Credentials
 
 1. Go to https://developer.twitter.com/
-2. Login with: Amirworks69@gmail.com
+2. Login with: <provider-account-email>
 3. Create a new Project and App
 4. Go to your App Settings → Keys and tokens
 5. Generate:
@@ -27,27 +27,27 @@ Create a `.env` file in this directory:
 
 ```env
 # GAME API Key
-GAME_API_KEY=apt-a2b47a408c4ccd7b160ee49c751fd741
+GAME_API_KEY=<set-in-local-env>
 
 # Twitter API Credentials
-TWITTER_API_KEY=your_api_key_here
-TWITTER_API_SECRET=your_api_secret_here
-TWITTER_ACCESS_TOKEN=your_access_token_here
-TWITTER_ACCESS_SECRET=your_access_secret_here
-TWITTER_BEARER_TOKEN=your_bearer_token_here
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # Backend APIs (update with your actual URLs)
-TEXT_DETECTOR_API_URL=http://localhost:5001/api/text
-IMAGE_DETECTOR_API_URL=http://localhost:5002/detect
+TEXT_DETECTOR_API_URL=<set-in-local-env>
+IMAGE_DETECTOR_API_URL=<set-in-local-env>
 
 # Optional: OpenAI API Key
-OPENAI_API_KEY=your_openai_key_if_needed
+OPENAI_API_KEY=<set-in-local-env>
 
 # Agent Configuration
-AGENT_TWITTER_HANDLE=YourAgentHandle
-CHECK_INTERVAL_SECONDS=60
-MAX_TWEETS_PER_CHECK=10
-AUTO_START=true
+AGENT_TWITTER_HANDLE=<set-in-local-env>
+CHECK_INTERVAL_SECONDS=<set-in-local-env>
+MAX_TWEETS_PER_CHECK=<set-in-local-env>
+AUTO_START=<set-in-local-env>
 ```
 
 ## Step 3: Install Dependencies

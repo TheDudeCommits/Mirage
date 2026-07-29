@@ -67,8 +67,8 @@ A fully autonomous agent that:
 
 **Login to Twitter Developer Portal:**
 - URL: https://developer.twitter.com/
-- Email: `Amirworks69@gmail.com`
-- Password: `VeriFiMirage@2025`
+- Email: `<provider-account-email>`
+- Password: <enter-interactively>
 
 **Create App and Generate:**
 - API Key & Secret
@@ -83,24 +83,24 @@ Create `/Back-GAME-Agent/.env`:
 
 ```env
 # GAME API Key (already provided)
-GAME_API_KEY=apt-a2b47a408c4ccd7b160ee49c751fd741
+GAME_API_KEY=<set-in-local-env>
 
 # Twitter Credentials (from Step 1)
-TWITTER_API_KEY=your_key
-TWITTER_API_SECRET=your_secret
-TWITTER_ACCESS_TOKEN=your_token
-TWITTER_ACCESS_SECRET=your_token_secret
-TWITTER_BEARER_TOKEN=your_bearer
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # Your agent's handle
-AGENT_TWITTER_HANDLE=YourHandle
+AGENT_TWITTER_HANDLE=<set-in-local-env>
 
 # Backend URLs (update if different)
-TEXT_DETECTOR_API_URL=http://localhost:5001/api/text
-IMAGE_DETECTOR_API_URL=http://localhost:5002/detect
+TEXT_DETECTOR_API_URL=<set-in-local-env>
+IMAGE_DETECTOR_API_URL=<set-in-local-env>
 
 # Auto-start agent on server launch
-AUTO_START=true
+AUTO_START=<set-in-local-env>
 ```
 
 ### Step 3: Start Everything
@@ -345,8 +345,8 @@ As requested, here's what was implemented:
 6. ✅ **Backend integration** with your AI detection API
 7. ✅ **Automatic replies** with verification results
 8. ✅ **Used your credentials**:
-   - GAME API: `apt-a2b47a408c4ccd7b160ee49c751fd741`
-   - Twitter account: `Amirworks69@gmail.com`
+   - GAME API: set via GAME_API_KEY in the local environment
+   - Twitter account: `<provider-account-email>`
 
 ---
 

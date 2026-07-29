@@ -6,18 +6,18 @@ Add these to your `.env.local` file:
 
 ```bash
 # ============ IPFS Configuration ============
-IPFS_HOST=ipfs.infura.io
-IPFS_PROJECT_ID=your_infura_project_id
-IPFS_API_KEY=your_infura_api_key
+IPFS_HOST=<set-in-local-env>
+IPFS_PROJECT_ID=<set-in-local-env>
+IPFS_API_KEY=<set-in-local-env>
 
 # ============ Blockchain ============
-VITE_CONTRACT_ADDRESS=0x64594731c7611C24E045188768BFfb1Ed1Ff71E7
-VITE_CHAIN_ID=84532
-BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-BASESCAN_API_KEY=M26TE4KGFWI2XRF23Q5ZWRMB1WK1BV5CHB
+VITE_CONTRACT_ADDRESS=<set-in-local-env>
+VITE_CHAIN_ID=<set-in-local-env>
+BASE_SEPOLIA_RPC_URL=<set-in-local-env>
+BASESCAN_API_KEY=<set-in-local-env>
 
 # ============ Deployment Wallet ============
-PRIVATE_KEY=your_test_wallet_private_key
+PRIVATE_KEY=<set-in-local-env>
 ```
 
 ## ✅ Current Deployment

@@ -34,6 +34,10 @@ export const config = {
 export function validateConfig() {
   const required = [
     { key: 'GAME_API_KEY', value: config.gameApiKey },
+    { key: 'TWITTER_API_KEY', value: config.twitter.apiKey },
+    { key: 'TWITTER_API_SECRET', value: config.twitter.apiSecret },
+    { key: 'TWITTER_ACCESS_TOKEN', value: config.twitter.accessToken },
+    { key: 'TWITTER_ACCESS_SECRET', value: config.twitter.accessSecret },
     { key: 'TWITTER_BEARER_TOKEN', value: config.twitter.bearerToken },
   ];
 
@@ -48,4 +52,3 @@ export function validateConfig() {
 
   console.log('✅ Configuration validated successfully');
 }
-

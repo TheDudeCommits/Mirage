@@ -2,6 +2,10 @@ node_modules/
 dist/
 .env
 .env.local
+*-credentials.txt
+credentials*.txt
+secrets*.txt
+!.env.example
+!.env.*.example
 *.log
 .DS_Store
-

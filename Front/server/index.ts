@@ -12,6 +12,11 @@ import passport from "./auth";
 import authRoutes from "./authRoutes";
 import { reloadTwitterStrategy } from "./reloadAuth";
 
+const sessionSecret = process.env.NEXTAUTH_SECRET;
+if (!sessionSecret) {
+  throw new Error("NEXTAUTH_SECRET must be set");
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -19,7 +24,7 @@ app.use(cookieParser());
 
 // Session middleware
 app.use(session({
-  secret: process.env.NEXTAUTH_SECRET || 'dev-session-secret',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {

@@ -15,8 +15,8 @@
 
 1. **Go to**: https://developer.twitter.com/
 2. **Login** with your Twitter account credentials:
-   - Email: `Amirworks69@gmail.com`
-   - Password: `VeriFiMirage@2025`
+   - Email: `<provider-account-email>`
+   - Password: <enter-interactively>
 
 3. **Create Project & App**:
    - Click "Projects & Apps" → "Create Project"
@@ -46,17 +46,17 @@
 Edit `/Back-GAME-Agent/.env` and replace the placeholder values:
 
 ```env
-GAME_API_KEY=apt-a2b47a408c4ccd7b160ee49c751fd741  # Already set ✅
+GAME_API_KEY=<set-in-local-env>
 
 # Add your Twitter credentials:
-TWITTER_API_KEY=paste_your_api_key_here
-TWITTER_API_SECRET=paste_your_api_secret_here
-TWITTER_ACCESS_TOKEN=paste_your_access_token_here
-TWITTER_ACCESS_SECRET=paste_your_access_secret_here
-TWITTER_BEARER_TOKEN=paste_your_bearer_token_here
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # Your agent's Twitter handle:
-AGENT_TWITTER_HANDLE=YourActualTwitterHandle
+AGENT_TWITTER_HANDLE=<set-in-local-env>
 ```
 
 ### Step 3: Start the AI Detection Backend
@@ -276,6 +276,6 @@ Once you have your Twitter API credentials:
 
 **Your Twitter Login for Dev Portal**:
 - URL: https://developer.twitter.com/
-- Email: `Amirworks69@gmail.com`
-- Password: `VeriFiMirage@2025`
+- Email: `<provider-account-email>`
+- Password: <enter-interactively>
 

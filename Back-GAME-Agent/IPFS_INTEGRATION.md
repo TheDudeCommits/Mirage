@@ -75,7 +75,7 @@ The GAME agent now automatically tracks all verification results on IPFS via Pin
 4. Copy the JWT token
 5. Add to `.env`:
    ```env
-   PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   PINATA_JWT=<set-in-local-env>
    ```
 
 **Option B: API Key + Secret**
@@ -84,8 +84,8 @@ The GAME agent now automatically tracks all verification results on IPFS via Pin
 2. Copy API Key and Secret Key
 3. Add to `.env`:
    ```env
-   PINATA_API_KEY=your_api_key
-   PINATA_SECRET_API_KEY=your_secret_key
+   PINATA_API_KEY=<set-in-local-env>
+   PINATA_SECRET_API_KEY=<set-in-local-env>
    ```
 
 ### Step 3: Update .env File
@@ -96,7 +96,7 @@ Edit `/Back-GAME-Agent/.env` and add your Pinata credentials:
 # All your existing credentials...
 
 # Pinata IPFS (choose one option)
-PINATA_JWT=your_jwt_token_here
+PINATA_JWT=<set-in-local-env>
 
 # OR
 
@@ -167,7 +167,7 @@ Click the IPFS link in the tweet reply. You'll see the complete verification met
 
 **With Pinata Credentials** → IPFS enabled ✅
 ```env
-PINATA_JWT=your_token
+PINATA_JWT=<set-in-local-env>
 ```
 
 **Without Credentials** → IPFS disabled (graceful)
@@ -240,7 +240,7 @@ Watch for these log messages:
 ✅ Test Pinata API manually:
 ```bash
 curl -X POST https://api.pinata.cloud/data/testAuthentication \
-  -H "Authorization: Bearer YOUR_JWT"
+# Authorization is supplied at runtime from TWITTER_BEARER_TOKEN.
 ```
 
 ### IPFS links not appearing in tweets
@@ -269,7 +269,7 @@ Use Pinata API to query all verifications:
 
 ```bash
 curl -X GET https://api.pinata.cloud/data/pinList \
-  -H "Authorization: Bearer YOUR_JWT" \
+# Authorization is supplied at runtime from TWITTER_BEARER_TOKEN.
   -G -d "metadata[keyvalues][type]=twitter-verification"
 ```
 
