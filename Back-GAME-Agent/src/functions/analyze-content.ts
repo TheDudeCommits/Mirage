@@ -5,6 +5,10 @@ import {
 } from "@virtuals-protocol/game";
 import axios from "axios";
 import { config } from "../config.js";
+import {
+  prepareDetectorRequest,
+  validateTextDetectorUrl,
+} from "../security/outbound-url.js";
 
 export const analyzeContentFunction = new GameFunction({
   name: "analyze_text_authenticity",
@@ -36,11 +40,29 @@ export const analyzeContentFunction = new GameFunction({
       logger(`Text: "${args.text.substring(0, 100)}..."`);
       
       // Call the text detection backend API
-      const response = await axios.post(
+      const detectorUrl = validateTextDetectorUrl(
         config.backends.textDetectorUrl,
+        {
+          environment: process.env.NODE_ENV,
+          allowedOrigins: config.backends.textDetectorAllowedOrigins,
+        },
+      );
+      const preparedRequest = await prepareDetectorRequest(detectorUrl);
+      const response = await axios.post(
+        preparedRequest.requestUrl,
         { text: args.text },
         {
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(preparedRequest.hostHeader
+              ? { Host: preparedRequest.hostHeader }
+              : {}),
+          },
+          httpsAgent: preparedRequest.httpsAgent,
+          proxy: false,
+          maxRedirects: 0,
+          maxContentLength: 1024 * 1024,
+          maxBodyLength: 256 * 1024,
           timeout: 30000, // 30 second timeout
         }
       );
@@ -68,4 +90,3 @@ export const analyzeContentFunction = new GameFunction({
     }
   },
 });
-
