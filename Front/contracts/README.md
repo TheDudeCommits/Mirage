@@ -58,16 +58,16 @@ Create or update `.env.local` in the Front directory:
 
 ```bash
 # Base Sepolia Testnet (for testing)
-BASE_SEPOLIA_RPC_URL=REMOVED_FROM_GIT_HISTORY
-PRIVATE_KEY=your_private_key_here
-BASESCAN_API_KEY=your_basescan_api_key
+BASE_SEPOLIA_RPC_URL=<set-in-local-env>
+PRIVATE_KEY=<set-in-local-env>
+BASESCAN_API_KEY=<set-in-local-env>
 
 # Base Mainnet (for production)
-BASE_MAINNET_RPC_URL=REMOVED_FROM_GIT_HISTORY
+BASE_MAINNET_RPC_URL=<set-in-local-env>
 
 # Optional: Gas reporting
-REPORT_GAS=true
-COINMARKETCAP_API_KEY=your_cmc_api_key
+REPORT_GAS=<set-in-local-env>
+COINMARKETCAP_API_KEY=<set-in-local-env>
 ```
 
 ### Get Testnet ETH
@@ -94,7 +94,7 @@ npx hardhat compile
 npx hardhat test
 
 # Run with gas reporting
-REPORT_GAS=true npx hardhat test
+REPORT_GAS=<set-in-local-env>
 
 # Run specific test file
 npx hardhat test test/ContentAuthenticityRegistry.test.ts
@@ -305,8 +305,8 @@ Deployment information is automatically saved to:
 After deployment, update your frontend `.env.local`:
 
 ```bash
-VITE_CONTRACT_ADDRESS=0x...
-VITE_CHAIN_ID=84532  # Base Sepolia
+VITE_CONTRACT_ADDRESS=<set-in-local-env>
+VITE_CHAIN_ID=<set-in-local-env>
 ```
 
 ## 🔄 Upgrade Path

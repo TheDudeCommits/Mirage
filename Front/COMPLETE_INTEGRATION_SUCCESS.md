@@ -236,8 +236,8 @@ struct VerificationRecord {
 
 2. **Update Environment Variables**
    ```
-   VITE_CONTRACT_ADDRESS=<mainnet_address>
-   BASE_MAINNET_RPC_URL=REMOVED_FROM_GIT_HISTORY
+   VITE_CONTRACT_ADDRESS=<set-in-local-env>
+   BASE_MAINNET_RPC_URL=<set-in-local-env>
    ```
 
 3. **Integrate with Your AI Detection**

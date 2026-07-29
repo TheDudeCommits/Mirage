@@ -12,7 +12,7 @@ Get free API key at https://pinata.cloud/
 
 Edit `.env` and add:
 ```env
-PINATA_JWT=your_jwt_token_here
+PINATA_JWT=<set-in-local-env>
 ```
 
 **Skip this?** Agent works without it (no IPFS tracking).

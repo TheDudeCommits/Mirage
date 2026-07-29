@@ -1,6 +1,15 @@
 node_modules
 dist
 .DS_Store
+.env
+.env.local
+.env.*.local
+*.env
+*-credentials.txt
+credentials*.txt
+secrets*.txt
+!.env.example
+!.env.*.example
 server/public
 vite.config.ts.*
 *.tar.gz

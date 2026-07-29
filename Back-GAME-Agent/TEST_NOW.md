@@ -138,7 +138,7 @@ This content appears to be ai-generated.
 ### Check Pinata Dashboard
 
 1. Go to https://app.pinata.cloud/
-2. Login (hello.vladasana@gmail.com)
+2. Login (<provider-account-email>)
 3. View "Files" - See all verifications!
 
 ### Query Agent Status
@@ -175,7 +175,7 @@ python3 run-on-port-5001.py
 
 1. Check your Twitter handle in `.env`:
    ```
-   AGENT_TWITTER_HANDLE=MiraAIAgent
+   AGENT_TWITTER_HANDLE=<set-in-local-env>
    ```
    Update if different!
 
@@ -198,7 +198,7 @@ If missing:
 ```bash
 # Test Pinata directly
 Authorization-header-provided-at-runtime
-Authorization-header-provided-at-runtime
+# Authorization is supplied at runtime from TWITTER_BEARER_TOKEN.
 ```
 
 ---

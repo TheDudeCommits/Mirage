@@ -22,7 +22,7 @@ This means Twitter is rejecting your Bearer Token.
 
 Go to: https://developer.twitter.com/en/portal/dashboard
 
-1. **Login** with: `Amirworks69@gmail.com` / `VeriFiMirage@2025`
+1. **Login** with: `<provider-account-email>` / `VeriFiMirage@2025`
 
 2. **Find your app** (or create a new one)
 
@@ -45,10 +45,10 @@ nano .env
 Replace the Bearer Token line:
 ```env
 # OLD (has %2F encoding issue):
-TWITTER_BEARER_TOKEN=AAAA...%2FB1v...
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # NEW (paste fresh token):
-TWITTER_BEARER_TOKEN=paste_new_token_here
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 ```
 
 **Important**: Make sure there are NO spaces or URL encoding in the token!
@@ -58,11 +58,11 @@ TWITTER_BEARER_TOKEN=paste_new_token_here
 While you're at it, verify all Twitter credentials are correct:
 
 ```env
-TWITTER_API_KEY=REMOVED_FROM_GIT_HISTORY
-TWITTER_API_SECRET=REMOVED_FROM_GIT_HISTORY
-TWITTER_ACCESS_TOKEN=REMOVED_FROM_GIT_HISTORY
-TWITTER_ACCESS_SECRET=REMOVED_FROM_GIT_HISTORY
-TWITTER_BEARER_TOKEN=your_fresh_bearer_token_here
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 ```
 
 ### Step 4: Get User ID
@@ -72,7 +72,7 @@ The agent needs your Twitter user ID. Get it from:
 **Option A: Twitter API**
 ```bash
 Authorization-header-provided-at-runtime
-Authorization-header-provided-at-runtime
+# Authorization is supplied at runtime from TWITTER_BEARER_TOKEN.
 ```
 
 **Option B: Online Tool**
@@ -82,7 +82,7 @@ Authorization-header-provided-at-runtime
 
 Then update `.env`:
 ```env
-TWITTER_USER_ID=your_numeric_id_here
+TWITTER_USER_ID=<set-in-local-env>
 ```
 
 ### Step 5: Test the Fix
@@ -107,7 +107,7 @@ Before running the agent, test your credentials:
 ```bash
 # Test Bearer Token
 Authorization-header-provided-at-runtime
-Authorization-header-provided-at-runtime
+# Authorization is supplied at runtime from TWITTER_BEARER_TOKEN.
 
 # Should return:
 {
@@ -202,7 +202,7 @@ Add this to see detailed Twitter API responses:
 ```typescript
 // In src/twitter-client.ts, add:
 console.log('Twitter API Request:', {
-  bearerToken: process.env.TWITTER_BEARER_TOKEN?.substring(0, 20) + '...',
+  bearerTokenConfigured: Boolean(process.env.TWITTER_BEARER_TOKEN),
   endpoint: 'v2/users/me'
 });
 ```
@@ -244,4 +244,3 @@ Then tweet at `@MiraAIAgent` and watch it work! 🚀
 ---
 
 **The GAME SDK package is FIXED! Just need to sort out Twitter credentials.** ✅
-
