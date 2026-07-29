@@ -8,7 +8,7 @@ from ai_detector import AIImageDetector
 import traceback
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # Create Flask app
 app = Flask(__name__)
@@ -113,4 +113,4 @@ def too_large(e):
     }), 413
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)

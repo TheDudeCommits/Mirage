@@ -2,43 +2,68 @@ const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const { run } = hre;
+const {
+  explorerAddressUrl,
+  normalizeContractAddress,
+  normalizeNetworkName,
+} = require("./verify-input");
+
+function readLatestDeployment() {
+  const deploymentsDir = path.resolve(__dirname, "../deployments");
+  if (!fs.existsSync(deploymentsDir)) {
+    throw new Error("No deployments directory found");
+  }
+
+  const files = fs.readdirSync(deploymentsDir, { withFileTypes: true })
+    .filter((entry) =>
+      entry.isFile() &&
+      /^[A-Za-z0-9._-]+\.json$/.test(entry.name) &&
+      !entry.name.includes("abi")
+    )
+    .map((entry) => entry.name)
+    .sort()
+    .reverse();
+
+  const latestFile = files[0];
+  if (!latestFile) {
+    throw new Error("No deployment file found");
+  }
+
+  const deploymentPath = path.resolve(deploymentsDir, latestFile);
+  if (path.dirname(deploymentPath) !== deploymentsDir) {
+    throw new Error("Unsafe deployment path");
+  }
+  const stat = fs.statSync(deploymentPath);
+  if (!stat.isFile() || stat.size > 64 * 1024) {
+    throw new Error("Invalid deployment file");
+  }
+
+  const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
+  return {
+    contractAddress: normalizeContractAddress(deployment.contractAddress),
+    networkName: normalizeNetworkName(deployment.network),
+    fileName: latestFile,
+  };
+}
 
 async function main() {
   console.log("🔍 Starting contract verification...\n");
 
-  // Get contract address from command line argument or latest deployment
   const args = process.argv.slice(2);
-  let contractAddress = args[0];
-  let networkName = args[1] || "baseSepolia";
-
-  if (!contractAddress) {
-    // Try to read from latest deployment file
-    const deploymentsDir = path.join(__dirname, "../deployments");
-    
-    if (fs.existsSync(deploymentsDir)) {
-      const files = fs.readdirSync(deploymentsDir)
-        .filter(f => f.endsWith('.json') && !f.includes('abi'))
-        .sort()
-        .reverse();
-      
-      if (files.length > 0) {
-        const latestDeployment = JSON.parse(
-          fs.readFileSync(path.join(deploymentsDir, files[0]), 'utf8')
-        );
-        contractAddress = latestDeployment.contractAddress;
-        networkName = latestDeployment.network;
-        console.log(`📄 Using latest deployment: ${files[0]}`);
-      }
-    }
+  if (args.length > 2) {
+    throw new Error("Usage: npm run verify <CONTRACT_ADDRESS> [base|baseSepolia]");
   }
 
-  if (!contractAddress) {
-    console.error("❌ No contract address provided and no deployment found.");
-    console.log("\nUsage:");
-    console.log("  npm run verify <CONTRACT_ADDRESS> [NETWORK]");
-    console.log("\nExample:");
-    console.log("  npm run verify 0x1234... baseSepolia");
-    process.exit(1);
+  let contractAddress: string;
+  let networkName: "base" | "baseSepolia";
+  if (args[0] === undefined) {
+    const deployment = readLatestDeployment();
+    contractAddress = deployment.contractAddress;
+    networkName = deployment.networkName;
+    console.log(`📄 Using latest deployment: ${deployment.fileName}`);
+  } else {
+    contractAddress = normalizeContractAddress(args[0]);
+    networkName = normalizeNetworkName(args[1] ?? "baseSepolia");
   }
 
   console.log(`📍 Contract address: ${contractAddress}`);
@@ -57,20 +82,12 @@ async function main() {
     console.log("\n✅ Contract verified successfully!");
     console.log(`🔗 View on explorer:`);
     
-    if (networkName === "baseSepolia") {
-      console.log(`   https://sepolia.basescan.org/address/${contractAddress}#code`);
-    } else if (networkName === "base") {
-      console.log(`   https://basescan.org/address/${contractAddress}#code`);
-    }
+    console.log(`   ${explorerAddressUrl(networkName, contractAddress)}`);
     
   } catch (error: any) {
     if (error.message.includes("Already Verified")) {
       console.log("\n✅ Contract is already verified!");
-      if (networkName === "baseSepolia") {
-        console.log(`🔗 https://sepolia.basescan.org/address/${contractAddress}#code`);
-      } else if (networkName === "base") {
-        console.log(`🔗 https://basescan.org/address/${contractAddress}#code`);
-      }
+      console.log(`🔗 ${explorerAddressUrl(networkName, contractAddress)}`);
     } else {
       console.error("\n❌ Verification failed:", error.message);
       console.log("\nTroubleshooting:");
@@ -89,4 +106,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
