@@ -5,11 +5,40 @@
 
 import dotenv from 'dotenv';
 import axios from 'axios';
+import {
+  buildPinataGatewayUrl,
+  buildPinataPinListUrl,
+  PINATA_API_ORIGIN,
+  PINATA_GATEWAY_ORIGIN,
+} from './server/security/pinata-url.js';
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
 
-const PINATA_API_URL = 'https://api.pinata.cloud';
+const pinataApi = axios.create({
+  baseURL: PINATA_API_ORIGIN,
+  allowAbsoluteUrls: false,
+  maxRedirects: 0,
+  timeout: 15_000,
+  maxContentLength: 2 * 1024 * 1024,
+});
+
+const pinataGateway = axios.create({
+  baseURL: PINATA_GATEWAY_ORIGIN,
+  allowAbsoluteUrls: false,
+  maxRedirects: 0,
+  timeout: 15_000,
+  maxContentLength: 2 * 1024 * 1024,
+});
+
+function safeRequestError(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    return error.response?.status
+      ? `Pinata request failed with HTTP ${error.response.status}`
+      : 'Pinata request failed';
+  }
+  return error instanceof Error ? error.message : 'Pinata request failed';
+}
 
 // Get authentication headers
 function getPinataHeaders() {
@@ -34,9 +63,12 @@ async function listPinnedFiles() {
   try {
     console.log('📦 Fetching your Pinata storage...\n');
 
-    const response = await axios.get(
-      `${PINATA_API_URL}/data/pinList?status=pinned&pageLimit=1000`,
-      { headers: getPinataHeaders() }
+    const response = await pinataApi.get(
+      '/data/pinList',
+      {
+        headers: getPinataHeaders(),
+        params: { status: 'pinned', pageLimit: 1000 },
+      }
     );
 
     const files = response.data.rows;
@@ -77,7 +109,7 @@ async function listPinnedFiles() {
     console.log(`📁 Total Files: ${count}`);
 
   } catch (error: any) {
-    console.error('❌ Error fetching Pinata data:', error.response?.data || error.message);
+    console.error('❌ Error fetching Pinata data:', safeRequestError(error));
   }
 }
 
@@ -86,11 +118,13 @@ async function listPinnedFiles() {
  */
 async function getFileDetails(cid: string) {
   try {
+    const pinListUrl = buildPinataPinListUrl(cid);
+    const gatewayUrl = buildPinataGatewayUrl(cid);
     console.log(`\n🔍 Fetching details for CID: ${cid}\n`);
 
     // Fetch metadata from Pinata
-    const response = await axios.get(
-      `${PINATA_API_URL}/data/pinList?hashContains=${cid}`,
+    const response = await pinataApi.get(
+      `${pinListUrl.pathname}${pinListUrl.search}`,
       { headers: getPinataHeaders() }
     );
 
@@ -110,12 +144,12 @@ async function getFileDetails(cid: string) {
     
     // Fetch actual content
     console.log('\n📥 Fetching content...\n');
-    const contentResponse = await axios.get(`https://gateway.pinata.cloud/ipfs/${cid}`);
+    const contentResponse = await pinataGateway.get(gatewayUrl.pathname);
     console.log('📄 Content:');
     console.log(JSON.stringify(contentResponse.data, null, 2));
 
   } catch (error: any) {
-    console.error('❌ Error:', error.response?.data || error.message);
+    console.error('❌ Error:', safeRequestError(error));
   }
 }
 
@@ -126,8 +160,8 @@ async function getAccountInfo() {
   try {
     console.log('👤 Fetching account information...\n');
 
-    const response = await axios.get(
-      `${PINATA_API_URL}/data/userPinnedDataTotal`,
+    const response = await pinataApi.get(
+      '/data/userPinnedDataTotal',
       { headers: getPinataHeaders() }
     );
 
@@ -139,7 +173,7 @@ async function getAccountInfo() {
     console.log(`   Total Size with Replications: ${formatBytes(data.pin_size_with_replications_total)}`);
 
   } catch (error: any) {
-    console.error('❌ Error:', error.response?.data || error.message);
+    console.error('❌ Error:', safeRequestError(error));
   }
 }
 
@@ -169,8 +203,8 @@ async function main() {
   try {
     // Check authentication first
     console.log('🔐 Testing authentication...');
-    await axios.get(
-      `${PINATA_API_URL}/data/testAuthentication`,
+    await pinataApi.get(
+      '/data/testAuthentication',
       { headers: getPinataHeaders() }
     );
     console.log('✅ Authentication successful!\n');
@@ -201,5 +235,3 @@ async function main() {
 
 // Run the script
 main();
-
-
