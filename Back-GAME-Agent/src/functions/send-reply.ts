@@ -5,6 +5,7 @@ import {
 } from "@virtuals-protocol/game";
 import type { TwitterClient } from "../twitter-client.js";
 import { createVerificationMetadata, uploadVerificationToIPFS } from "../ipfs-tracker.js";
+import { verifyReplyInput } from "../security/reply-input.js";
 
 export function createSendReplyFunction(twitterClient: TwitterClient) {
   return new GameFunction({
@@ -44,26 +45,27 @@ export function createSendReplyFunction(twitterClient: TwitterClient) {
     ] as const,
     executable: async (args, logger) => {
       try {
-        logger(`📤 Preparing reply for @${args.author_username}...`);
+        const input = verifyReplyInput(args);
+        logger(`📤 Preparing reply for @${input.authorUsername}...`);
         
         // Upload verification to IPFS first
         const metadata = createVerificationMetadata(
-          args.tweet_id,
-          args.text || '',
-          args.author_username,
-          args.classification,
-          args.confidence
+          input.tweetId,
+          input.text,
+          input.authorUsername,
+          input.classification,
+          input.confidence
         );
         
         const ipfsCid = await uploadVerificationToIPFS(metadata);
         
         // Format the reply message
-        const emoji = args.classification === "Human-Written" ? "✅" : "🤖";
+        const emoji = input.classification === "Human-Written" ? "✅" : "🤖";
         let message = 
-          `${emoji} Verification Result for @${args.author_username}\n\n` +
-          `Classification: ${args.classification}\n` +
-          `Confidence: ${args.confidence}%\n\n` +
-          `This content appears to be ${args.classification.toLowerCase()}.`;
+          `${emoji} Verification Result for @${input.authorUsername}\n\n` +
+          `Classification: ${input.classification}\n` +
+          `Confidence: ${input.confidence}%\n\n` +
+          `This content appears to be ${input.classification.toLowerCase()}.`;
         
         // Add IPFS link if available
         if (ipfsCid) {
@@ -74,11 +76,11 @@ export function createSendReplyFunction(twitterClient: TwitterClient) {
         logger(`Reply message: ${message}`);
         
         // Send the reply
-        const success = await twitterClient.replyToTweet(args.tweet_id, message);
+        const success = await twitterClient.replyToTweet(input.tweetId, message);
         
         if (success) {
-          logger(`✅ Successfully replied to tweet ${args.tweet_id}`);
-          const result = `Replied to @${args.author_username} with verification results`;
+          logger(`✅ Successfully replied to tweet ${input.tweetId}`);
+          const result = `Replied to @${input.authorUsername} with verification results`;
           return new ExecutableGameFunctionResponse(
             ExecutableGameFunctionStatus.Done,
             ipfsCid ? `${result}. IPFS: ${ipfsCid}` : result
@@ -86,7 +88,7 @@ export function createSendReplyFunction(twitterClient: TwitterClient) {
         } else {
           return new ExecutableGameFunctionResponse(
             ExecutableGameFunctionStatus.Failed,
-            `Failed to send reply to tweet ${args.tweet_id}`
+            `Failed to send reply to tweet ${input.tweetId}`
           );
         }
         
@@ -100,4 +102,3 @@ export function createSendReplyFunction(twitterClient: TwitterClient) {
     },
   });
 }
-
