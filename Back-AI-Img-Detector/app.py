@@ -5,7 +5,6 @@ from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from ai_detector import AIImageDetector
-import traceback
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -78,7 +77,7 @@ def detect_ai_image():
             }), 400
         
         # Process the image
-        logging.info(f"Processing image: {file.filename}")
+        logging.info("Processing uploaded image")
         results = detector.analyze_image(file)
         
         return jsonify({
@@ -86,12 +85,11 @@ def detect_ai_image():
             'results': results
         })
         
-    except Exception as e:
-        logging.error(f"Error processing image: {str(e)}")
-        logging.error(traceback.format_exc())
+    except Exception:
+        logging.exception("Image processing failed")
         
         return jsonify({
-            'error': f'Failed to process image: {str(e)}',
+            'error': 'Failed to process image',
             'success': False
         }), 500
 

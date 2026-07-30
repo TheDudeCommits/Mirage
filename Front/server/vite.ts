@@ -16,8 +16,10 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
+  const safeSource = source.replace(/\n|\r/g, "").slice(0, 64);
+  const safeMessage = message.replace(/\n|\r/g, "").slice(0, 2048);
 
-  console.log(`${formattedTime} [${source}] ${message}`);
+  console.log(`${formattedTime} [${safeSource}] ${safeMessage}`);
 }
 
 export async function setupVite(app: Express, server: Server) {

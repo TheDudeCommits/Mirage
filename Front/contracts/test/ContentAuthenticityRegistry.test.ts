@@ -320,11 +320,17 @@ describe("ContentAuthenticityRegistry", function () {
           DetectionType.TEXT
         );
 
-      await expect(
-        registry.connect(verifier1).updateVerificationCid(contentHash, newIpfsCid)
-      )
+      const updateTransaction = await registry
+        .connect(verifier1)
+        .updateVerificationCid(contentHash, newIpfsCid);
+      const updateReceipt = await updateTransaction.wait();
+      const updateBlock = await ethers.provider.getBlock(
+        updateReceipt!.blockNumber,
+      );
+
+      await expect(updateTransaction)
         .to.emit(registry, "VerificationUpdated")
-        .withArgs(contentHash, newIpfsCid, await time.latest());
+        .withArgs(contentHash, newIpfsCid, updateBlock!.timestamp);
 
       const verification = await registry.getVerification(contentHash);
       expect(verification.ipfsCid).to.equal(newIpfsCid);
@@ -541,4 +547,3 @@ describe("ContentAuthenticityRegistry", function () {
     });
   });
 });
-
