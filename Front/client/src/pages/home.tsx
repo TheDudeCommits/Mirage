@@ -35,44 +35,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { useDisconnect } from "wagmi";
+import SafeMessageContent from "@/components/SafeMessageContent";
 
 type Mode = "text" | "voice" | "mira" | "detector";
 type DetectorMode = "text" | "image" | "video" | "voice";
-
-// Message formatting function for better readability
-const formatMessage = (text: string): string => {
-  return (
-    text
-      // Convert double asterisks to bold
-      .replace(
-        /\*\*(.*?)\*\*/g,
-        '<strong style="color: var(--askmira-primary); font-weight: 600;">$1</strong>',
-      )
-      // Convert single asterisks to italic
-      .replace(
-        /\*(.*?)\*/g,
-        '<em style="color: var(--askmira-text); font-style: italic;">$1</em>',
-      )
-      // Convert numbered lists
-      .replace(
-        /^(\d+)\.\s+(.+)$/gm,
-        '<div style="margin: 8px 0; padding-left: 8px;"><span style="color: var(--askmira-primary); font-weight: bold;">$1.</span> $2</div>',
-      )
-      // Convert bullet points
-      .replace(
-        /^[-•*]\s+(.+)$/gm,
-        '<div style="margin: 4px 0; padding-left: 8px;"><span style="color: var(--askmira-primary);">•</span> $1</div>',
-      )
-      // Convert double line breaks to paragraph breaks
-      .replace(/\n\n/g, '</p><p style="margin: 12px 0;">')
-      // Convert single line breaks to br tags
-      .replace(/\n/g, "<br/>")
-      // Wrap in paragraph tags if content exists
-      .replace(/^(.+)/, '<p style="margin: 0;">$1</p>')
-      // Clean up empty paragraphs
-      .replace(/<p[^>]*><\/p>/g, "")
-  );
-};
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState<Mode>("text");
@@ -1375,11 +1341,9 @@ export default function Home() {
                             whiteSpace: "pre-wrap",
                           }}
                         >
-                          <div
+                          <SafeMessageContent
                             className={`message-content ${message.isUser ? "font-mono" : "font-sans"}`}
-                            dangerouslySetInnerHTML={{
-                              __html: formatMessage(message.text),
-                            }}
+                            text={message.text}
                           />
                         </div>
                       </div>
@@ -1784,26 +1748,7 @@ export default function Home() {
                                 </div>
                               )}
                             </Button>
-                            {detectorFile && activeDetectorMode === "image" && (
-                              <div className="mt-4 space-y-2">
-                                <p className="text-xs font-mono text-[var(--askmira-primary)] opacity-70 text-center">
-                                  File selected: {detectorFile.name}
-                                </p>
-                                <div className="flex justify-center">
-                                  <div className="border border-[rgba(0,212,170,0.3)] rounded-lg p-2 bg-[rgba(0,0,0,0.2)] max-w-xs">
-                                    <img
-                                      src={URL.createObjectURL(detectorFile)}
-                                      alt="Uploaded image preview"
-                                      className="w-full h-auto rounded max-h-48 object-contain"
-                                      style={{
-                                        filter: "drop-shadow(0 0 10px rgba(0, 212, 170, 0.3))",
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            {detectorFile && activeDetectorMode !== "image" && (
+                            {detectorFile && (
                               <p className="text-xs font-mono text-[var(--askmira-primary)] opacity-70 text-center">
                                 File selected: {detectorFile.name}
                               </p>

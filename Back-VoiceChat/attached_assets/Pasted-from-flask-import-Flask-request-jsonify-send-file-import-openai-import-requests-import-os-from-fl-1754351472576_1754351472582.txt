@@ -8,8 +8,8 @@ app = Flask(__name__)
 CORS(app)
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")
-VOICE_ID = "aEO01A4wXwd1O8GPgGlF"
+ELEVENLABS_API_KEY=<set-in-local-env>
+VOICE_ID=<set-in-local-env>
 
 @app.route('/api/voice', methods=['POST'])
 def handle_voice():

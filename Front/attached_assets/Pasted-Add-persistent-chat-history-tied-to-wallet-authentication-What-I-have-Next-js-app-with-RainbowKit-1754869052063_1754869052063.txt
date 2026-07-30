@@ -81,10 +81,10 @@ Env & setup
 
 Add .env.local with placeholders and comments:
 
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=***generate strong secret***
-WALLETCONNECT_PROJECT_ID=*** (already set) ***
-DATABASE_URL=***Neon Postgres connection string***
+NEXTAUTH_URL=<set-in-local-env>
+NEXTAUTH_SECRET=<set-in-local-env>
+WALLETCONNECT_PROJECT_ID=<set-in-local-env>
+DATABASE_URL=<set-in-local-env>
 Create prisma/migrations and run prisma migrate dev.
 
 On dev start, log to console if DATABASE_URL or NEXTAUTH_SECRET is missing.

@@ -1,23 +1,23 @@
-FROM node:20-alpine
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
-
-# Install dependencies
 RUN npm ci
-
-# Copy source code
 COPY src ./src
-
-# Build TypeScript
 RUN npm run build
 
-# Expose port
+FROM node:22-alpine AS runner
+
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --omit=dev \
+    && npm cache clean --force
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+USER node
 EXPOSE 3001
-
-# Start the agent
 CMD ["npm", "start"]
-

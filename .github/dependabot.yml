@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - /Back-GAME-Agent
+      - /Front
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-security-and-maintenance:
+        patterns:
+          - "*"
+
+  - package-ecosystem: pip
+    directories:
+      - /Back-AI-Img-Detector
+      - /Back-AI-Text-Detector
+      - /Back-TextChat
+      - /Back-VoiceChat
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      python-security-and-maintenance:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directories:
+      - /Back-AI-Img-Detector
+      - /Back-AI-Text-Detector
+      - /Back-GAME-Agent
+      - /Back-TextChat
+      - /Back-VoiceChat
+      - /Front
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      container-security-and-maintenance:
+        patterns:
+          - "*"

@@ -59,11 +59,11 @@ Create .env.local with placeholders and comments:
 ini
 Copy
 Edit
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=***generate a strong secret***
-TWITTER_CLIENT_ID=***
-TWITTER_CLIENT_SECRET=***
-WALLETCONNECT_PROJECT_ID=***
+NEXTAUTH_URL=<set-in-local-env>
+NEXTAUTH_SECRET=<set-in-local-env>
+TWITTER_CLIENT_ID=<set-in-local-env>
+TWITTER_CLIENT_SECRET=<set-in-local-env>
+WALLETCONNECT_PROJECT_ID=<set-in-local-env>
 Print to console on startup which providers are enabled and warn if any env vars are missing.
 
 Docs in comments for me:

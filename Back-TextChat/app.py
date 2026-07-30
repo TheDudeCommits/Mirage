@@ -14,7 +14,10 @@ logging.basicConfig(level=logging.DEBUG)
 # Create Flask app with async capabilities
 app = Flask(__name__)
 CORS(app)  # Enable CORS
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+session_secret = os.environ.get("SESSION_SECRET")
+if not session_secret:
+    raise RuntimeError("SESSION_SECRET must be set")
+app.secret_key = session_secret
 
 # Initialize both sync and async OpenAI clients for hybrid approach
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")

@@ -19,6 +19,7 @@ export const config = {
   // Backend APIs
   backends: {
     textDetectorUrl: process.env.TEXT_DETECTOR_API_URL || 'http://localhost:5001/api/detect',
+    textDetectorAllowedOrigins: process.env.TEXT_DETECTOR_ALLOWED_ORIGINS || '',
     imageDetectorUrl: process.env.IMAGE_DETECTOR_API_URL || 'http://localhost:5002/detect',
   },
   
@@ -34,6 +35,10 @@ export const config = {
 export function validateConfig() {
   const required = [
     { key: 'GAME_API_KEY', value: config.gameApiKey },
+    { key: 'TWITTER_API_KEY', value: config.twitter.apiKey },
+    { key: 'TWITTER_API_SECRET', value: config.twitter.apiSecret },
+    { key: 'TWITTER_ACCESS_TOKEN', value: config.twitter.accessToken },
+    { key: 'TWITTER_ACCESS_SECRET', value: config.twitter.accessSecret },
     { key: 'TWITTER_BEARER_TOKEN', value: config.twitter.bearerToken },
   ];
 
@@ -48,4 +53,3 @@ export function validateConfig() {
 
   console.log('✅ Configuration validated successfully');
 }
-

@@ -44,8 +44,8 @@ You **MUST** set up Twitter API access before the agent can work.
 
 1. Go to https://developer.twitter.com/
 2. Login with:
-   - Email: **Amirworks69@gmail.com**
-   - Password: **VeriFiMirage@2025**
+   - Email: **<provider-account-email>**
+   - Password: <enter-interactively>
 
 3. Create a new **Project** and **App**:
    - Go to Projects & Apps → Create Project
@@ -71,27 +71,27 @@ Create a `.env` file in `/Back-GAME-Agent/`:
 
 ```env
 # GAME API Key (already provided)
-GAME_API_KEY=REMOVED_FROM_GIT_HISTORY
+GAME_API_KEY=<set-in-local-env>
 
 # Twitter API Credentials (GET THESE FROM STEP 1)
-TWITTER_API_KEY=your_api_key_here
-TWITTER_API_SECRET=your_api_secret_here
-TWITTER_ACCESS_TOKEN=your_access_token_here
-TWITTER_ACCESS_SECRET=your_access_secret_here
-TWITTER_BEARER_TOKEN=your_bearer_token_here
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # Your Agent's Twitter Handle (without @)
-AGENT_TWITTER_HANDLE=YourAgentHandle
+AGENT_TWITTER_HANDLE=<set-in-local-env>
 
 # Backend API URLs (update if needed)
-TEXT_DETECTOR_API_URL=http://localhost:5001/api/text
-IMAGE_DETECTOR_API_URL=http://localhost:5002/detect
+TEXT_DETECTOR_API_URL=<set-in-local-env>
+IMAGE_DETECTOR_API_URL=<set-in-local-env>
 
 # Agent Configuration
-CHECK_INTERVAL_SECONDS=60
-MAX_TWEETS_PER_CHECK=10
-AUTO_START=true
-PORT=3001
+CHECK_INTERVAL_SECONDS=<set-in-local-env>
+MAX_TWEETS_PER_CHECK=<set-in-local-env>
+AUTO_START=<set-in-local-env>
+PORT=<set-in-local-env>
 ```
 
 ### Step 3: Start Your Backend Services

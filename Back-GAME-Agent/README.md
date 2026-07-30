@@ -43,29 +43,29 @@ Create `.env` file:
 
 ```env
 # GAME API Key
-GAME_API_KEY=your_game_api_key
+GAME_API_KEY=<set-in-local-env>
 
 # Twitter Credentials
-TWITTER_API_KEY=your_api_key
-TWITTER_API_SECRET=your_api_secret
-TWITTER_ACCESS_TOKEN=your_access_token
-TWITTER_ACCESS_SECRET=your_access_secret
-TWITTER_BEARER_TOKEN=your_bearer_token
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
 
 # Your Agent's Twitter Handle
-AGENT_TWITTER_HANDLE=YourAgentHandle
+AGENT_TWITTER_HANDLE=<set-in-local-env>
 
 # Backend API
-TEXT_DETECTOR_API_URL=http://localhost:5001/api/detect
+TEXT_DETECTOR_API_URL=<set-in-local-env>
 
 # IPFS Storage (Optional)
-PINATA_JWT=your_pinata_jwt
+PINATA_JWT=<set-in-local-env>
 
 # Agent Settings
-CHECK_INTERVAL_SECONDS=60
-MAX_TWEETS_PER_CHECK=10
-AUTO_START=true
-PORT=3001
+CHECK_INTERVAL_SECONDS=<set-in-local-env>
+MAX_TWEETS_PER_CHECK=<set-in-local-env>
+AUTO_START=<set-in-local-env>
+PORT=<set-in-local-env>
 ```
 
 ## 🚀 Usage

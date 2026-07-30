@@ -289,8 +289,8 @@ Compare to storing everything on-chain:
 1. Get Infura IPFS credentials
 2. Add to `.env.local`:
    ```bash
-   IPFS_PROJECT_ID=your_id
-   IPFS_API_KEY=your_key
+   IPFS_PROJECT_ID=<set-in-local-env>
+   IPFS_API_KEY=<set-in-local-env>
    ```
 3. Update frontend detection flow
 4. Test end-to-end workflow

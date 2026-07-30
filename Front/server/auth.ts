@@ -24,7 +24,7 @@ function getEnvVars() {
   return {
     TWITTER_CONSUMER_KEY: process.env.TWITTER_CLIENT_ID,
     TWITTER_CONSUMER_SECRET: process.env.TWITTER_CLIENT_SECRET,
-    JWT_SECRET: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
+    JWT_SECRET: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
     BASE_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000'
   };
 }
@@ -32,27 +32,12 @@ function getEnvVars() {
 // Initialize auth configuration
 function initializeAuth() {
   const { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, JWT_SECRET, BASE_URL } = getEnvVars();
-  
-  // Debug environment loading
-  console.log('🔍 Debug env vars:', {
-    TWITTER_CLIENT_ID: process.env.TWITTER_CLIENT_ID ? 'SET' : 'MISSING',
-    TWITTER_CLIENT_SECRET: process.env.TWITTER_CLIENT_SECRET ? 'SET' : 'MISSING',
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? 'SET' : 'MISSING',
-    envKeys: Object.keys(process.env).filter(k => k.includes('TWITTER'))
-  });
-  
-  // Log configuration status
-  console.log('🔐 Authentication Configuration:');
-  console.log('  Twitter OAuth:', TWITTER_CONSUMER_KEY ? '✅ Configured' : '❌ Missing TWITTER_CLIENT_ID');
-  console.log('  JWT Secret:', JWT_SECRET !== 'default-dev-secret' ? '✅ Configured' : '⚠️ Using default (set NEXTAUTH_SECRET)');
-  console.log('  Base URL:', BASE_URL);
-  console.log('  Callback URL: ' + BASE_URL + '/api/auth/callback/twitter');
 
   if (!TWITTER_CONSUMER_KEY || !TWITTER_CONSUMER_SECRET) {
-    console.error('❌ Missing Twitter OAuth credentials. Please set:');
-    console.error('   TWITTER_CLIENT_ID=your_client_id');
-    console.error('   TWITTER_CLIENT_SECRET=your_client_secret');
-    console.error('   Get them from: https://developer.twitter.com/en/portal/dashboard');
+    throw new Error("TWITTER_CLIENT_ID and TWITTER_CLIENT_SECRET must be set");
+  }
+  if (!JWT_SECRET) {
+    throw new Error("NEXTAUTH_SECRET or JWT_SECRET must be set");
   }
   
   return { TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, JWT_SECRET, BASE_URL };
@@ -70,24 +55,18 @@ function getInitializedEnvVars() {
 // Configure Twitter Strategy (OAuth 1.0a - more stable than OAuth 2.0)
 // Use a function to get fresh env vars at runtime
 function configureTwitterStrategy() {
-  const freshEnvVars = getEnvVars();
+  const freshEnvVars = getInitializedEnvVars();
   // Use localhost for development since it's now added to Twitter app
   const baseUrl = process.env.NODE_ENV === 'production' 
     ? 'https://askmira.io' 
     : (process.env.NEXTAUTH_URL || 'http://localhost:3000'); // Development uses localhost (now configured in Twitter app)
     
   return new TwitterStrategy({
-    consumerKey: freshEnvVars.TWITTER_CONSUMER_KEY || 'demo-key',
-    consumerSecret: freshEnvVars.TWITTER_CONSUMER_SECRET || 'demo-secret',
+    consumerKey: freshEnvVars.TWITTER_CONSUMER_KEY,
+    consumerSecret: freshEnvVars.TWITTER_CONSUMER_SECRET,
     callbackURL: `${baseUrl}/api/auth/callback/twitter`,
     includeEmail: false // Twitter API v1.1 email requires special approval
-  }, (token: string, tokenSecret: string, profile: TwitterProfile, done: Function) => {
-    console.log('Twitter auth callback received:', {
-      id: profile.id,
-      username: profile.username,
-      displayName: profile.displayName
-    });
-    
+  }, (_token: string, _tokenSecret: string, profile: TwitterProfile, done: Function) => {
     const user: AuthenticatedUser = {
       id: profile.id,
       username: profile.username,
@@ -124,15 +103,44 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
 // Generate JWT token
 export const generateAuthToken = (user: AuthenticatedUser): string => {
-  return jwt.sign(user, getInitializedEnvVars().JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(user, getInitializedEnvVars().JWT_SECRET, {
+    algorithm: 'HS256',
+    audience: 'askmira-web',
+    issuer: 'askmira',
+    expiresIn: '7d',
+  });
 };
 
 // Verify JWT token
 export const verifyAuthToken = (token: string): AuthenticatedUser | null => {
   try {
-    return jwt.verify(token, getInitializedEnvVars().JWT_SECRET) as AuthenticatedUser;
-  } catch (error) {
-    console.error('JWT verification failed:', error);
+    const decoded = jwt.verify(token, getInitializedEnvVars().JWT_SECRET, {
+      algorithms: ['HS256'],
+      audience: 'askmira-web',
+      issuer: 'askmira',
+    });
+    if (
+      typeof decoded !== 'object' ||
+      decoded.provider !== 'twitter' ||
+      typeof decoded.id !== 'string' ||
+      typeof decoded.username !== 'string' ||
+      typeof decoded.displayName !== 'string' ||
+      decoded.id.length > 128 ||
+      decoded.username.length > 128 ||
+      decoded.displayName.length > 256
+    ) {
+      return null;
+    }
+    return {
+      id: decoded.id,
+      username: decoded.username,
+      displayName: decoded.displayName,
+      profileImageUrl: typeof decoded.profileImageUrl === 'string'
+        ? decoded.profileImageUrl
+        : undefined,
+      provider: 'twitter',
+    };
+  } catch {
     return null;
   }
 };

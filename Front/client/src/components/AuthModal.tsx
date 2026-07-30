@@ -43,20 +43,19 @@ export default function AuthModal() {
   useEffect(() => {
     const MIN_CHECK_INTERVAL = 5000; // Minimum 5 seconds between auth checks
     
-    const checkTwitterAuth = async (forceCheck = false) => {
+    const checkTwitterAuth = async () => {
       const now = Date.now();
       const timeSinceLastCheck = now - lastAuthCheckRef.current;
       
       // Prevent excessive API calls - only check if:
-      // 1. Force check is requested (OAuth callback)
-      // 2. Not already checking
-      // 3. Not already authenticated
-      // 4. Enough time has passed since last check
-      if (!forceCheck && (
+      // 1. Not already checking
+      // 2. Not already authenticated
+      // 3. Enough time has passed since last check
+      if (
         isCheckingTwitterAuth || 
         isTwitterAuthenticated || 
         timeSinceLastCheck < MIN_CHECK_INTERVAL
-      )) {
+      ) {
         return;
       }
       
@@ -84,24 +83,20 @@ export default function AuthModal() {
     };
 
     // Debounced auth check function
-    const debouncedAuthCheck = (forceCheck = false, delay = 100) => {
+    const debouncedAuthCheck = (delay = 100) => {
       if (authCheckTimeoutRef.current) {
         clearTimeout(authCheckTimeoutRef.current);
       }
       
       authCheckTimeoutRef.current = setTimeout(() => {
-        checkTwitterAuth(forceCheck);
+        checkTwitterAuth();
       }, delay);
     };
 
     // Check when URL changes (for OAuth callback)
     const handleURLChange = () => {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('twitter_auth') === 'success') {
-        // Clear URL parameter and force check auth
-        window.history.replaceState({}, document.title, window.location.pathname);
-        debouncedAuthCheck(true, 100);
-      } else if (params.get('error') === 'twitter_config_error') {
+      if (params.get('error') === 'twitter_config_error') {
         console.error('Twitter app configuration error - check API keys and app settings');
         window.history.replaceState({}, document.title, window.location.pathname);
         setIsCheckingTwitterAuth(false);
@@ -114,7 +109,7 @@ export default function AuthModal() {
 
     // Only check on mount if not already authenticated and enough time has passed
     if (!isTwitterAuthenticated) {
-      debouncedAuthCheck(false, 500);
+      debouncedAuthCheck(500);
     }
 
     window.addEventListener('popstate', handleURLChange);
@@ -131,22 +126,9 @@ export default function AuthModal() {
   const handleTwitterLogin = async () => {
     console.log('Initiating Twitter OAuth...');
     setIsCheckingTwitterAuth(true);
-    
-    try {
-      // Test if the endpoint is available first
-      const response = await fetch('/api/auth/twitter', { method: 'HEAD' });
-      if (!response.ok) {
-        console.error('Twitter auth endpoint not available');
-        setIsCheckingTwitterAuth(false);
-        return;
-      }
-      
-      // Redirect to Twitter OAuth
-      window.location.href = '/api/auth/twitter';
-    } catch (error) {
-      console.error('Failed to initiate Twitter OAuth:', error);
-      setIsCheckingTwitterAuth(false);
-    }
+
+    // The server performs availability checks and rate limiting.
+    window.location.assign('/api/auth/twitter');
   };
 
   const handleLogout = async () => {

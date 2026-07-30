@@ -48,6 +48,12 @@ replit.nix
 .env
 .env.local
 .env.*.local
+*.env
+*-credentials.txt
+credentials*.txt
+secrets*.txt
+!.env.example
+!.env.*.example
 *.local
 
 # Logs
@@ -128,4 +134,3 @@ docker-compose.override.yml
 *.bak
 *.backup
 *.old
-

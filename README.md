@@ -419,34 +419,34 @@ All services require `.env` files. Templates provided in each directory.
 
 **Frontend** (`.env.local`):
 ```env
-TWITTER_CLIENT_ID=
-TWITTER_CLIENT_SECRET=
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=http://localhost:3000
-WALLETCONNECT_PROJECT_ID=
-DATABASE_URL=
-PINATA_JWT=
-BASE_SEPOLIA_RPC_URL=
+TWITTER_CLIENT_ID=<set-in-local-env>
+TWITTER_CLIENT_SECRET=<set-in-local-env>
+NEXTAUTH_SECRET=<set-in-local-env>
+NEXTAUTH_URL=<set-in-local-env>
+WALLETCONNECT_PROJECT_ID=<set-in-local-env>
+DATABASE_URL=<set-in-local-env>
+PINATA_JWT=<set-in-local-env>
+BASE_SEPOLIA_RPC_URL=<set-in-local-env>
 ```
 
 **GAME Agent** (`.env`):
 ```env
-GAME_API_KEY=
-TWITTER_API_KEY=
-TWITTER_API_SECRET=
-TWITTER_ACCESS_TOKEN=
-TWITTER_ACCESS_SECRET=
-TWITTER_BEARER_TOKEN=
-AGENT_TWITTER_HANDLE=
-TEXT_DETECTOR_API_URL=http://localhost:5001/api/detect
-PINATA_JWT=
+GAME_API_KEY=<set-in-local-env>
+TWITTER_API_KEY=<set-in-local-env>
+TWITTER_API_SECRET=<set-in-local-env>
+TWITTER_ACCESS_TOKEN=<set-in-local-env>
+TWITTER_ACCESS_SECRET=<set-in-local-env>
+TWITTER_BEARER_TOKEN=<set-in-local-env>
+AGENT_TWITTER_HANDLE=<set-in-local-env>
+TEXT_DETECTOR_API_URL=<set-in-local-env>
+PINATA_JWT=<set-in-local-env>
 ```
 
 **Backend Services**:
 ```env
-OPENAI_API_KEY=
-ELEVENLABS_API_KEY=
-FLASK_ENV=development
+OPENAI_API_KEY=<set-in-local-env>
+ELEVENLABS_API_KEY=<set-in-local-env>
+FLASK_ENV=<set-in-local-env>
 ```
 
 ---
