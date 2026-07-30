@@ -15,6 +15,7 @@ from urllib3.util.retry import Retry
 
 # Configure logging - reduced for production performance
 logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
@@ -204,8 +205,9 @@ def handle_voice():
         
         return response, 200
 
-    except Exception as e:
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+    except Exception:
+        logger.exception("Voice request failed")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -242,8 +244,9 @@ def test_audio():
         
         return response, 200
         
-    except Exception as e:
-        return jsonify({"error": f"Test audio failed: {str(e)}"}), 500
+    except Exception:
+        logger.exception("Audio test failed")
+        return jsonify({"error": "Test audio failed"}), 500
 
 @app.route('/api/test-audio-raw', methods=['GET'])
 def test_audio_raw():
@@ -273,8 +276,9 @@ def test_audio_raw():
         
         return response
         
-    except Exception as e:
-        return jsonify({"error": f"Raw audio test failed: {str(e)}"}), 500
+    except Exception:
+        logger.exception("Raw audio test failed")
+        return jsonify({"error": "Raw audio test failed"}), 500
 
 @app.route('/api/test-audio-wav', methods=['GET'])  
 def test_audio_wav():
@@ -323,8 +327,9 @@ def test_audio_wav():
         
         return response, 200
         
-    except Exception as e:
-        return jsonify({"error": f"WAV test failed: {str(e)}"}), 500
+    except Exception:
+        logger.exception("WAV audio test failed")
+        return jsonify({"error": "WAV test failed"}), 500
 
 @app.route('/test', methods=['GET'])
 def test_interface():

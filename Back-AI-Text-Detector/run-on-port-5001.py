@@ -4,8 +4,12 @@ from model import DesklibAIDetectionModel, predict_single_text
 from transformers import AutoTokenizer
 import torch
 import os
+import logging
 from docx import Document
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
@@ -54,11 +58,11 @@ def detect_ai_text():
             "probability": round(prob * 100, 2),
             "label": "AI-Generated" if label == 1 else "Human-Written"
         })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("AI text detection failed")
+        return jsonify({"error": "Unable to process request"}), 500
 
 if __name__ == "__main__":
     print("🚀 Starting AI Text Detector on port 5001...")
     print("🔗 API endpoint: http://localhost:5001/api/detect")
     app.run(host="0.0.0.0", port=5001, debug=False)
-

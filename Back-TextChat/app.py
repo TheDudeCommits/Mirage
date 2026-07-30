@@ -73,7 +73,7 @@ def handle_text():
         # Trim message for processing
         message = message.strip()
         
-        logging.debug(f"Received message: {message}")
+        logging.debug("Received text request")
         
         # Step 1: Create a new thread
         thread = openai_client.beta.threads.create()
@@ -137,23 +137,24 @@ def handle_text():
                 except (AttributeError, IndexError):
                     continue
         
-        logging.debug(f"Assistant response: {assistant_message}")
+        logging.debug("Assistant response received")
         
         return jsonify({"reply": assistant_message})
         
-    except Exception as e:
-        logging.error(f"Error processing assistant request: {str(e)}")
+    except Exception as exc:
+        logging.exception("Assistant request failed")
         
         # Handle specific OpenAI errors
-        if "openai" in str(type(e)).lower():
-            if "rate_limit" in str(e).lower():
+        if "openai" in str(type(exc)).lower():
+            error_text = str(exc).lower()
+            if "rate_limit" in error_text:
                 return jsonify({"error": "Rate limit exceeded. Please try again later."}), 429
-            elif "invalid_api_key" in str(e).lower():
+            elif "invalid_api_key" in error_text:
                 return jsonify({"error": "Invalid OpenAI API key"}), 401
-            elif "insufficient_quota" in str(e).lower():
+            elif "insufficient_quota" in error_text:
                 return jsonify({"error": "OpenAI API quota exceeded"}), 402
             else:
-                return jsonify({"error": f"OpenAI API error: {str(e)}"}), 500
+                return jsonify({"error": "OpenAI request failed"}), 500
         
         # Generic error handling
         return jsonify({"error": "Internal server error occurred"}), 500
@@ -270,9 +271,9 @@ def handle_text_stream():
             # Send final response
             yield f"data: {json.dumps({'status': 'complete', 'reply': assistant_message})}\n\n"
             
-        except Exception as e:
-            logging.error(f"Error in streaming request: {str(e)}")
-            yield f"data: {json.dumps({'error': f'Server error: {str(e)}'})}\n\n"
+        except Exception:
+            logging.exception("Streaming request failed")
+            yield f"data: {json.dumps({'error': 'Server error'})}\n\n"
     
     return Response(generate_stream(), content_type='text/event-stream')
 
