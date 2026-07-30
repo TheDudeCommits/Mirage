@@ -17,6 +17,6 @@ test("log neutralizes line breaks in untrusted fields", () => {
   assert.doesNotMatch(entries[0], /[\r\n]/);
   assert.match(
     entries[0],
-    /\[api forged-source\] request complete  \[forged\] success$/,
+    /\[apiforged-source\] request complete\[forged\] success$/,
   );
 });
