@@ -117,7 +117,7 @@
     "@replit/vite-plugin-cartographer": "^0.2.7",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
     "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "^4.1.3",
+    "@tailwindcss/vite": "^4.3.3",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.20",
@@ -132,7 +132,7 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.5.13",
-    "@vitejs/plugin-react": "^4.3.2",
+    "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.4.20",
     "chai": "^4.5.0",
     "dotenv": "^17.2.3",
@@ -150,7 +150,7 @@
     "tw-animate-css": "^1.3.8",
     "typechain": "^8.3.2",
     "typescript": "5.6.3",
-    "vite": "^5.4.19"
+    "vite": "^8.1.5"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
