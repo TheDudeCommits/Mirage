@@ -11,16 +11,16 @@
   },
   "dependencies": {
     "@virtuals-protocol/game": "^0.1.14",
-    "axios": "^1.18.1",
-    "dotenv": "^16.4.7",
-    "express": "^4.22.2",
-    "twitter-api-v2": "^1.17.2",
-    "typescript": "^5.6.3"
+    "axios": "^1.19.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "twitter-api-v2": "^1.29.0",
+    "typescript": "^7.0.2"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.16.11",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.3"
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.4",
+    "typescript": "^7.0.2"
   }
 }
