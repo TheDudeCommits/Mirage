@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@virtuals-protocol/game": "^0.1.14",
-    "axios": "^1.18.1",
+    "axios": "^1.20.0",
     "dotenv": "^16.4.7",
     "express": "^4.22.2",
     "twitter-api-v2": "^1.17.2",
